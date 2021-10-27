@@ -32,7 +32,7 @@ type Gateway interface {
 	CreateOrder(db *sql.DB, orderCreationParams P) (orderID string, err error)
 
 	// Admin/Customer
-	LookupOrder(db *sql.DB, ReferenceID string) (orderDetails P, err error)
+	LookupOrderID(db *sql.DB, ReferenceID string) (orderID string, err error)
 
 	// Admin(payee)-only, should be provided from database.
 	OrderDetail(db *sql.DB, orderID string) (orderDetails P, err error)
@@ -57,7 +57,8 @@ type GatewayCallback interface {
 
 	// callback URL should be a complete URL
 	// e.g., https://ulysses.tunnel.work/api/callback/paypal
-	// caller is responsible to bind Callback() to the same endpoint
+	// caller is responsible to bind Callback() to the same endpoint,
+	// for both POST and GET method
 	SetCallbackURL(callback string)
 
 	// Actual Callback function that needs to be connected to gin Router

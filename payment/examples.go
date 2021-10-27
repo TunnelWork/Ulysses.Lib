@@ -86,6 +86,7 @@ var (
 			"Value":    "4.20",
 			"Currency": "USD",
 		},
+		"GatewayType": "GatewayBillable",
 	}
 
 	// Will not be parsed, used for debugging purposes.
