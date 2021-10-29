@@ -1,8 +1,6 @@
 package payment
 
 type (
-	PaymentStatus uint8
-
 	// P stands for Parameters and is a shortcut for map[string]interface{}
 	P map[string]interface{}
 
@@ -10,6 +8,13 @@ type (
 	PaymentRequest struct {
 		Item PaymentUnit
 	}
+
+	PaymentResult struct {
+		Status PaymentStatus
+		Unit   PaymentUnit
+	}
+
+	PaymentStatus uint8
 
 	// PaymentUnit defines a single item or order to be paid
 	PaymentUnit struct {

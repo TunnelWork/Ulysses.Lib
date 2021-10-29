@@ -10,9 +10,9 @@ type PrepaidGateway interface {
 	CheckoutForm(pr PaymentRequest) (HTMLCheckoutForm string, err error)
 
 	/**** Status ****/
-	// PaymentStatus() checks for a referenceID
+	// PaymentResult() checks for a referenceID
 	// this function should be called once a customer CLAIMS the payment has been made
-	PaymentStatus(referenceID string) (paymentStatus PaymentStatus, err error)
+	PaymentResult(referenceID string) (result PaymentResult, err error)
 
 	/**** Refund ****/
 	// IsRefundable() checks for refundability for a referenceID
@@ -25,5 +25,5 @@ type PrepaidGateway interface {
 	/**** Callback ****/
 	// OnStatusChange() sets the function to be called once the referenceID's payment status is changed
 	// returns error when doesn't have such callback functionality
-	OnStatusChange(SuccessFunc func(referenceID string, newPaymentStatus PaymentStatus)) error
+	OnStatusChange(UpdateHandler func(referenceID string, newResult PaymentResult)) error
 }
