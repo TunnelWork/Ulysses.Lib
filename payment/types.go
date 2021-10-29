@@ -12,6 +12,7 @@ type (
 	PaymentResult struct {
 		Status PaymentStatus
 		Unit   PaymentUnit
+		Msg    string
 	}
 
 	PaymentStatus uint8
