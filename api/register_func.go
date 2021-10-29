@@ -2,8 +2,6 @@ package api
 
 import (
 	"errors"
-	"runtime"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,21 +20,19 @@ var (
 
 // RegisterNewAPIEndpoint() allows only one single handler function,
 // unlike with direct Gin.Router access.
-// note: this is overpowered and makes the system vulnerable to malicious code.
-// in this version, I made it callable ONLY from main package.
 func RegisterApiEndpoint(method uint, relativePath string, handler *gin.HandlerFunc) error {
-	var packageName string
-	pc, _, _, ok := runtime.Caller(1)
-	details := runtime.FuncForPC(pc)
-	if ok && details != nil {
-		packageName = strings.Split(details.Name(), ".")[0]
-	}
+	// var packageName string
+	// pc, _, _, ok := runtime.Caller(1)
+	// details := runtime.FuncForPC(pc)
+	// if ok && details != nil {
+	// 	packageName = strings.Split(details.Name(), ".")[0]
+	// }
 
-	if packageName == "main" {
-		return registerApiEndpoint(method, relativePath, handler)
-	} else {
-		return ErrNotAllowDirectFuncReg
-	}
+	// if packageName == "main" {
+	return registerApiEndpoint(method, relativePath, handler)
+	// } else {
+	// 	return ErrNotAllowDirectFuncReg
+	// }
 }
 
 func registerApiEndpoint(method uint, relativePath string, handler *gin.HandlerFunc) error {

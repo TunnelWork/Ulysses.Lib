@@ -5,19 +5,27 @@ import (
 	"errors"
 )
 
-type gatewayGenFunc func(*sql.DB) (Gateway, error)
+// A PrepaidGatewayGen is a generator function creates PrepaidGateway
+// typically called NewXXXGateway() or CreateXXXGateway()
+type PrepaidGatewayGen func(db *sql.DB, instanceID string, initConf interface{}) (PrepaidGateway, error)
 
 var (
-	gatewayRegistry map[string]gatewayGenFunc = map[string]gatewayGenFunc{}
+	prepaidGatewayRegistry map[string]PrepaidGatewayGen = map[string]PrepaidGatewayGen{}
 )
 
-func RegisterGatewayGenFun(gatewayName string, genFunc gatewayGenFunc) {
-	gatewayRegistry[gatewayName] = genFunc
+func RegisterPrepaidGateway(gatewayTypeName string, genFunc PrepaidGatewayGen) {
+	// if _, ok := prepaidGatewayRegistry[gatewayTypeName]; ok {
+	// 	panic(fmt.Sprintf("payment.RegisterPrepaidGateway() tries to register repeated gatewayTypeName: %s", gatewayTypeName)) // This is a panic() level conflict
+	// }
+	prepaidGatewayRegistry[gatewayTypeName] = genFunc // Overwrites existing ones
 }
 
-func NewGateway(gatewayName string, db *sql.DB) (Gateway, error) {
-	if genFunc, ok := gatewayRegistry[gatewayName]; ok {
-		return genFunc(db)
+// NewPrepaidGateway() creates a PrepaidGateway in the type of gatewayTypeName
+// with the specified instanceID, which supports the duplicapability for each gatewayType.
+// Note: it is caller's responsibility to make sure the *sql.DB is alive.
+func NewPrepaidGateway(db *sql.DB, gatewayTypeName string, instanceID string, initConf interface{}) (PrepaidGateway, error) {
+	if genFunc, ok := prepaidGatewayRegistry[gatewayTypeName]; ok {
+		return genFunc(db, instanceID, initConf)
 	} else {
 		return nil, errors.New("payment: gateway name not found")
 	}

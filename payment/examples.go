@@ -91,8 +91,7 @@ var (
 
 	// Will not be parsed, used for debugging purposes.
 	ExampleOrderDetails P = P{
-		"OrderID":     "0xDEADC0DE",
-		"ReferenceID": "TunnelWork-#109",
+		"OrderID": "0xDEADC0DE",
 		"Amount": P{
 			"Value":    "4.20",
 			"Currency": "USD",
@@ -104,14 +103,13 @@ var (
 
 	// Will be parsed and also recorded
 	ExampleOrderStatus P = P{
-		"OrderID":         "0xDEADC0DE",
-		"ReferenceID":     "TunnelWork-#109",
-		"Status":          "Unpaid",        // "Unpaid", "Paid", "Refunded", "Closed"
-		"PayerIdentifier": "i@gaukas.wang", // Not necessarily correlatable to the user
+		"OrderID": "0xDEADC0DE",
+		"Status":  "UNPAID",        // "UNPAID", "Paid", "Closed"
+		"Payer":   "i@gaukas.wang", // Not necessarily correlatable to the user
 	}
 
 	ExampleOrderFormTemplate P = P{
-		"Type": "OnSite", // "OnSite", "Button", "CreditCard"
+		"Type": "OnSite", // "OnSite", "Button", "CreditCard", "HTML"
 		"OnSiteParams": P{ // Mocking a credit card interface. For real credit card, use credit card type
 			"card_holder": P{
 				"FriendlyName": "Card Holder",

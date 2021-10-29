@@ -1,20 +1,38 @@
 package payment
 
 type (
-	InputType string
+	PaymentStatus uint8
+
+	// P stands for Parameters and is a shortcut for map[string]interface{}
+	P map[string]interface{}
+
+	// PaymentRequest is an extra layer as a wrapper to provider extendability in the future
+	PaymentRequest struct {
+		Item PaymentUnit
+	}
+
+	// PaymentUnit defines a single item or order to be paid
+	PaymentUnit struct {
+		// A caller-generated special ID used for order to track the payment
+		ReferenceID string `json:"reference_id"`
+
+		// The 3-letter currency code following ISO 4217
+		// https://en.wikipedia.org/wiki/ISO_4217#Active_codes
+		Currency string `json:"currency"`
+
+		// A floating number written as a string. Precision should be limited to prevent payment issues
+		Price string `json:"price"`
+	}
+
+	RefundRequest struct {
+		Item PaymentUnit
+	}
 )
 
-// InputType compatible for gatewayConfigTemplate
-var (
-	Text     InputType = "text"
-	Password InputType = "password"
-	Textarea InputType = "textarea"
-
-	Number InputType = "number"
-
-	Radiogroup InputType = "radiogroup"
-	Dropdown   InputType = "dropdown"
+// OrderStatus
+const (
+	UNPAID PaymentStatus = iota
+	PAID
+	CLOSED
+	UNKNOWN
 )
-
-// P stands for Parameters and is a shortcut for map[string]interface{}
-type P map[string]interface{}

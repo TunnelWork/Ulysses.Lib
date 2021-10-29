@@ -1,82 +1,29 @@
 package payment
 
-import (
-	"database/sql"
+// Note: Gateway implementations should be scalable, as Ulysses itself is highly scalable.
+// It is recommended to save anything possible to database.
 
-	"github.com/gin-gonic/gin"
-)
+// PrepaidGateway allows user to pay
+// based on their purchase or deposit order.
+type PrepaidGateway interface {
+	/**** Pay ****/
+	CheckoutForm(pr PaymentRequest) (HTMLCheckoutForm string, err error)
 
-type GatewayStatusFlag uint32
+	/**** Status ****/
+	// PaymentStatus() checks for a referenceID
+	// this function should be called once a customer CLAIMS the payment has been made
+	PaymentStatus(referenceID string) (paymentStatus PaymentStatus, err error)
 
-const (
-	GATEWAY_NEEDCONFIG GatewayStatusFlag = 1 << iota // If set, the gateway is properly configured. Otherwise it needs to be configured before use.
-	GATEWAY_BADCONFIG
-	GATEWAY_GOOD
-)
+	/**** Refund ****/
+	// IsRefundable() checks for refundability for a referenceID
+	// It should always return false for a gateway without Refund() capability
+	IsRefundable(referenceID string) bool
 
-type Gateway interface {
-	/*** Status ***/
-	GatewayStatus() GatewayStatusFlag
+	// Refund() returns nil if successfully refunded.
+	Refund(rr RefundRequest) error
 
-	/*** Gateway Config ***/
-	// GatewayConfigTemplate() returns needed parameters in setting up the Gateway.
-	// Please see examples.go for an example
-	// this is used for frontend implementation compatibilities
-	GatewayConfigTemplate() (gatewayConfigTemplate P)
-
-	// GatewayConfig() saves gatewayConfiguration to database
-	GatewayConfig(db *sql.DB, gatewayConfig P) error
-
-	/*** Order Operations ***/
-	// Customer(payer)-only
-	CreateOrder(db *sql.DB, orderCreationParams P) (orderID string, err error)
-
-	// Admin/Customer
-	LookupOrderID(db *sql.DB, ReferenceID string) (orderID string, err error)
-
-	// Admin(payee)-only, should be provided from database.
-	OrderDetail(db *sql.DB, orderID string) (orderDetails P, err error)
-
-	// For Admin(payee)/Customer(payer), should be fetched from remote API
-	// everytime gets requested
-	CheckOrderStatus(db *sql.DB, orderID string) (orderStatus P, err error)
-
-	//
-	GenerateOrderForm(db *sql.DB, orderID string) (orderFormTemplate P, err error)
-	FinalizeOnSiteOrderForm(db *sql.DB, onSiteOrderForm P) error
-
-	CancelOrder(db *sql.DB, orderID string) error
-}
-
-type GatewayCallback interface {
-	Gateway
-
-	// Set which handlerFunc() to be called with latest orderStatus for an order
-	// when there's a callback from the Payment provider.
-	SetCallbackHandler(handlerFunc func(orderStatus P))
-
-	// callback URL should be a complete URL
-	// e.g., https://ulysses.tunnel.work/api/callback/paypal
-	// caller is responsible to bind Callback() to the same endpoint,
-	// for both POST and GET method
-	SetCallbackURL(callback string)
-
-	// Actual Callback function that needs to be connected to gin Router
-	Callback(db *sql.DB, c *gin.Context)
-}
-
-type GatewayRefundable interface {
-	Gateway
-
-	// Refund() the orderID in full or partial, depending on the params
-	Refund(db *sql.DB, orderRefundParams P) error
-}
-
-type GatewayBillable interface {
-	Gateway
-
-	// Bill() positively collect payment from a user
-	// based on a pre-approved agreement.
-	// the amount charged might be limited or not.
-	Bill(db *sql.DB, uid uint, orderCreationParams P) (orderStatus P, err error)
+	/**** Callback ****/
+	// OnStatusChange() sets the function to be called once the referenceID's payment status is changed
+	// returns error when doesn't have such callback functionality
+	OnStatusChange(SuccessFunc func(referenceID string, newPaymentStatus PaymentStatus)) error
 }
