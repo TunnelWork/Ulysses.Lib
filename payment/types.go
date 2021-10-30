@@ -27,7 +27,7 @@ type (
 		Currency string `json:"currency"`
 
 		// A floating number written as a string. Precision should be limited to prevent payment issues
-		Price string `json:"price"`
+		Price float64 `json:"price"`
 	}
 
 	RefundRequest struct {
