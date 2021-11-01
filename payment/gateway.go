@@ -22,8 +22,8 @@ type PrepaidGateway interface {
 	// Refund() returns nil if successfully refunded.
 	Refund(rr RefundRequest) error
 
-	/**** Callback ****/
+	/**** Callback Setup ****/
 	// OnStatusChange() sets the function to be called once the referenceID's payment status is changed
 	// returns error when doesn't have such callback functionality
-	OnStatusChange(UpdateHandler func(referenceID string, newResult PaymentResult)) error
+	OnStatusChange(PtrUpdateHandler *func(referenceID string, newResult PaymentResult)) error
 }

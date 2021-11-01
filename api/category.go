@@ -7,14 +7,18 @@ import (
 // API categories. Any package (no matter official or third party) except for main package must
 // choose a category to register the API endpoints.
 const (
-	Payment uint8 = iota
+	Assets uint8 = iota
+	Payment
 	PaymentCallback
+	Plugin
 	Server
 )
 
 var availableCategories map[uint8]string = map[uint8]string{
+	Assets:          "assets/",
 	Payment:         "payment/",
 	PaymentCallback: "payment/callback/",
+	Plugin:          "plugin/",
 	Server:          "server/",
 }
 
