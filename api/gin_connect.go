@@ -1,6 +1,8 @@
 package api
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,11 +25,28 @@ func FinalizeGinEngine(router *gin.Engine, pathPrefix string) {
 		pathPrefix = pathPrefix + "/"
 	}
 
-	for path, handler := range mapGet {
-		router.GET(pathPrefix+path, *handler)
+	for path, handlers := range mapGet {
+		sliceHandler := []gin.HandlerFunc{}
+		for _, handler := range handlers {
+			sliceHandler = append(sliceHandler, *handler)
+		}
+		router.GET(pathPrefix+path, sliceHandler...)
 	}
 
-	for path, handler := range mapPost {
-		router.POST(pathPrefix+path, *handler)
+	for path, handlers := range mapPost {
+		sliceHandler := []gin.HandlerFunc{}
+		for _, handler := range handlers {
+			sliceHandler = append(sliceHandler, *handler)
+		}
+		router.POST(pathPrefix+path, sliceHandler...)
 	}
+
+	// TODO: Clean up
+	router.GET(pathPrefix+"internal/response", func(c *gin.Context) {
+		cmd := c.Query("cmd")
+		switch cmd {
+		case "listAllMsg":
+			c.JSON(http.StatusOK, payloadResponseListAllMsg())
+		}
+	})
 }
