@@ -1,39 +1,36 @@
 package server
 
-// Server interface-compatible structs should be copyable.
-// Recommended design:
-// - Pointer to struct
-// - Member pointers in struct
+// Server structs must be scalable, for Ulysses itself is highly scalable.
+// Thus, stateless design is enforced.
+
+// Note: Server should be self-refreshed.
+// i.e., if some resource is monthly-purged,
+// Server should implement required mechanisms to reflect it
+
 type Server interface {
-	//// Server Settings: Alter the local information needed to interact with a backend server.
+	/// Server
 
-	// UpdateServer() should update the internal variable of a Server to reflect the new state.
-	UpdateServer(sconf Configurables) (err error)
+	// ResourceGroup() shows usage statistics of all allocatable resources on the server
+	ResourceGroup() ServerResourceGroup
 
-	//// Account Operations: Connects to the backend server to perform operations for user accounts.
+	//// Account
 
-	// AddAccount() utilizes internal server configuration and aconf pased in to create a series of accounts with
+	// CreateAccount() utilizes internal server configuration and aconf pased in to create a series of accounts with
 	// same sconf and variable aconf in order.
-	// This function returns immediately upon an error has occured. The returned accID should contain IDs for
-	// all successfully created accounts.
-	AddAccount(aconf []Configurables) (accID []int, err error)
+	CreateAccount(referenceID int, accountConfiguration interface{}) error
+
+	// ReadAccount() returns an ServerAccount-compatible struct
+	ReadAccount(referenceID int) (ServerAccount, error)
 
 	// UpdateAccount() utilizes internal server configuration and aconf pased in to update a series of accounts
-	// specified by accID.
-	// This function returns immediately upon an error has occured. The returned successAccID should contain
-	// IDs for all successfully updated accounts.
-	UpdateAccount(accID []int, aconf []Configurables) (successAccID []int, err error)
+	// specified by referenceID.
+	UpdateAccount(referenceID int, accountConfiguration interface{}) error
 
 	// DeleteAccount() utilizes internal server configuration to delete a series of accounts specified by accID.
-	// This function returns immediately upon an error has occured. The returned successAccID should contain
-	// IDs for all successfully deleted accounts.
-	DeleteAccount(accID []int) (successAccID []int, err error)
+	DeleteAccount(referenceID int) error
 
-	//// User Interface Helpers: Acquire needed informations from Server for the User Interface or Admin Panel.
-
-	// GetCredentials() fetch Credentials in JSON string format for each Account specified by accID.
-	GetCredentials(accID []int) ([]Credential, error)
-
-	// GetUsage() fetch the history usages of each service specified by accID
-	GetUsage(accID []int) ([]AccountUsage, error)
+	// PurgeResourceUsage sets all USED resource counter to 0 for all users.
+	// usecase: clean-reinstall
+	// Won't be automatically called on a time-basis. Not a cronjob mounting point.
+	PurgeResourceUsage()
 }

@@ -9,6 +9,4 @@ var (
 	ErrServerUnknown        = errors.New("ulysses/server: server type is not registered")
 	ErrServerConfigurables  = errors.New("ulysses/server: bad server config")
 	ErrAccountConfigurables = errors.New("ulysses/server: bad account config")
-	ErrBadJsonObject        = errors.New("ulysses/server: bad JSON object")
-	ErrBadJsonArray         = errors.New("ulysses/server: bad JSON array")
 )
