@@ -121,6 +121,24 @@ func (w *Wallet) SecureFund(amount float64) error {
 	return err
 }
 
+func (w *Wallet) UndoSecureFund(amount float64) error {
+	if amount <= 0 {
+		return ErrBadAmount
+	}
+	stmtSecureAmount, err := sqlStatement(`UPDATE dbprefix_wallets 
+        SET Secured = (CASE
+            WHEN Secured >= ? THEN Secured - ?
+            ELSE (SELECT table_name FROM information_schema.tables)
+        END), Balance = Balance + ? WHERE WalletID = ?;`)
+	if err != nil {
+		return err
+	}
+	defer stmtSecureAmount.Close()
+
+	_, err = stmtSecureAmount.Exec(amount, amount, amount, w.walletID)
+	return err
+}
+
 func (w *Wallet) SpendSecured(amount float64) error {
 	if amount <= 0 {
 		return ErrBadAmount

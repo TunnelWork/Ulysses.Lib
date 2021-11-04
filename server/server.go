@@ -17,17 +17,21 @@ type Server interface {
 
 	// CreateAccount() utilizes internal server configuration and aconf pased in to create a series of accounts with
 	// same sconf and variable aconf in order.
-	CreateAccount(referenceID int, accountConfiguration interface{}) error
+	CreateAccount(referenceID uint64, accountConfiguration interface{}) error
 
 	// ReadAccount() returns an ServerAccount-compatible struct
-	ReadAccount(referenceID int) (ServerAccount, error)
+	ReadAccount(referenceID uint64) (ServerAccount, error)
 
 	// UpdateAccount() utilizes internal server configuration and aconf pased in to update a series of accounts
 	// specified by referenceID.
-	UpdateAccount(referenceID int, accountConfiguration interface{}) error
+	UpdateAccount(referenceID uint64, accountConfiguration interface{}) error
 
 	// DeleteAccount() utilizes internal server configuration to delete a series of accounts specified by accID.
-	DeleteAccount(referenceID int) error
+	DeleteAccount(referenceID uint64) error
+
+	// Temporarily disable an account from being used or recover it
+	SuspendAccount(referenceID uint64) error
+	UnsuspendAccount(referenceID uint64) error
 
 	// PurgeResourceUsage sets all USED resource counter to 0 for all users.
 	// usecase: clean-reinstall
