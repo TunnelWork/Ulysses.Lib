@@ -7,7 +7,7 @@ package server
 // i.e., if some resource is monthly-purged,
 // Server should implement required mechanisms to reflect it
 
-type Server interface {
+type ProvisioningServer interface {
 	/// Server
 
 	// ResourceGroup() shows usage statistics of all allocatable resources on the server
@@ -20,7 +20,7 @@ type Server interface {
 	CreateAccount(productID uint64, accountConfiguration interface{}) error
 
 	// ReadAccount() returns an ServerAccount-compatible struct
-	GetAccount(productID uint64) (ServerAccount, error)
+	GetAccount(productID uint64) (Account, error)
 
 	// UpdateAccount() utilizes internal server configuration and aconf pased in to update a series of accounts
 	// specified by productID.

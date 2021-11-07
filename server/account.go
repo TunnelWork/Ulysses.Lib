@@ -1,6 +1,6 @@
 package server
 
-type ServerAccount interface {
+type Account interface {
 	Credentials() (AccountCredentials, error)
 	ResourceGroup() (AccountResourceGroup, error)
 }
