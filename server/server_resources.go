@@ -2,13 +2,13 @@ package server
 
 // It is up to module designer to parse/utilize the AccountUsage.
 type ServerResourceGroup interface {
-	AllResourceNames() []string
-	SelectedResources(resNames ...string) map[string]*Resource
+	ListResources() []uint64                              // uint64 is enum of resource name
+	SelectedResources(res ...uint64) map[uint64]*Resource // uint64 is enum of resource name
 
-	ResourceAllocations(resNames ...string) map[string]*ServerResourceAllocation
+	ResourceAllocations(res ...uint64) map[uint64]*ServerResourceAllocation //	uint64 is enum of resource name
 }
 
 type ServerResourceAllocation struct {
-	UserAllocatedPercentageMap map[string]float64
-	UserConsumedPercentageMap  map[string]float64
+	UserAllocatedPercentageMap map[uint64]float64 // uint64 is user id
+	UserConsumedPercentageMap  map[uint64]float64 // uint64 is user id
 }
