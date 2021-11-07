@@ -1,31 +1,102 @@
 package billing
 
+import (
+	"database/sql"
+	"encoding/base64"
+	"errors"
+
+	"github.com/golang-jwt/jwt/v4"
+)
+
 type Wallet struct {
 	// Internal
 	walletID uint64
 	ownerID  uint64
 
-	// Total assets owned by a user
-	// Assets secured for an active Pay-As-You-Go service
+	publicKey []byte
 }
 
 func UserWallet(ownerID uint64) (*Wallet, error) {
-	stmtCheckoutWallet, err := sqlStatement(`SELECT WalletID FROM dbprefix_wallets WHERE OwnerID = ? AND Disabled = FALSE ORDER BY WalletID ASC;`)
+	stmtCheckoutWallet, err := sqlStatement(`SELECT WalletID, PublicKey FROM dbprefix_wallets WHERE OwnerID = ? AND Disabled = FALSE ORDER BY WalletID ASC;`)
 	if err != nil {
 		return nil, err
 	}
 	defer stmtCheckoutWallet.Close()
 
 	var walletID uint64
-	err = stmtCheckoutWallet.QueryRow(ownerID).Scan(&walletID)
+	var publicKeyB64 sql.NullString
+	err = stmtCheckoutWallet.QueryRow(ownerID).Scan(&walletID, &publicKeyB64)
+	if err != sql.ErrNoRows {
+		resultWallet := Wallet{
+			walletID: walletID,
+			ownerID:  ownerID,
+		}
+		if publicKeyB64.Valid {
+			publicKey, _ := base64.StdEncoding.DecodeString(publicKeyB64.String)
+			resultWallet.publicKey = publicKey
+		}
+		return &resultWallet, err
+	} else { // register new wallet for user
+		return createWallet(ownerID)
+	}
+}
+
+// called by UserWallet() when user doesn't have a wallet
+func createWallet(ownerID uint64) (*Wallet, error) {
+	stmtCreateWallet, err := sqlStatement(`INSERT INTO dbprefix_wallets (OwnerID) VALUE(?);`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmtCreateWallet.Close()
+
+	result, err := stmtCreateWallet.Exec(ownerID)
 	if err != nil {
 		return nil, err
 	}
 
+	walletID, err := result.LastInsertId()
 	return &Wallet{
-		walletID: walletID,
+		walletID: uint64(walletID),
 		ownerID:  ownerID,
-	}, nil
+	}, err
+}
+
+// WalletByID() build a Wallet struct reflecting an entry in the database.
+func WalletByID(walletID uint64) (*Wallet, error) {
+	stmtCheckoutWallet, err := sqlStatement(`SELECT OwnerID, PublicKey FROM dbprefix_wallets WHERE WalletID = ? AND Disabled = FALSE;`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmtCheckoutWallet.Close()
+
+	var ownerID uint64
+	var publicKeyB64 sql.NullString
+	err = stmtCheckoutWallet.QueryRow(walletID).Scan(&ownerID, &publicKeyB64)
+	if err != sql.ErrNoRows {
+		resultWallet := Wallet{
+			walletID: walletID,
+			ownerID:  ownerID,
+		}
+		if publicKeyB64.Valid {
+			publicKey, _ := base64.StdEncoding.DecodeString(publicKeyB64.String)
+			resultWallet.publicKey = publicKey
+		}
+		return &resultWallet, err
+	} else { // register new wallet for user
+		return nil, errors.New("billing: wallet not found")
+	}
+}
+
+func (w *Wallet) AvailableFund() (float64, error) {
+	stmtRealtimeAvailableFund, err := sqlStatement(`SELECT Balance-Secured FROM dbprefix_wallets where WalletID = ?;`)
+	if err != nil {
+		return 0, err
+	}
+	defer stmtRealtimeAvailableFund.Close()
+
+	var available float64
+	err = stmtRealtimeAvailableFund.QueryRow(w.walletID).Scan(&available)
+	return available, err
 }
 
 func (w *Wallet) Balance() (float64, error) {
@@ -40,28 +111,39 @@ func (w *Wallet) Balance() (float64, error) {
 	return balance, err
 }
 
-func (w *Wallet) Secured() (float64, error) {
-	stmtRealtimeSecuredFund, err := sqlStatement(`SELECT Secured FROM dbprefix_wallets where WalletID = ?;`)
-	if err != nil {
-		return 0, err
+// Charge() is unsafe version of Spend().
+// It doesn't fail when user can't afford it.
+// USE ONLY FOR POST-USE BILLING
+func (w *Wallet) Charge(amount float64) error {
+	if amount <= 0 {
+		return ErrBadAmount
 	}
-	defer stmtRealtimeSecuredFund.Close()
+	stmtChargeAmount, err := sqlStatement(`UPDATE dbprefix_wallets 
+        SET Balance = Balance - ? 
+        WHERE WalletID = ?;`)
+	if err != nil {
+		return err
+	}
+	defer stmtChargeAmount.Close()
 
-	var secured float64
-	err = stmtRealtimeSecuredFund.QueryRow(w.walletID).Scan(&secured)
-	return secured, err
+	_, err = stmtChargeAmount.Exec(amount, w.walletID)
+	return err
 }
 
-func (w *Wallet) AvailableFund() (float64, error) {
-	stmtRealtimeAvailableFund, err := sqlStatement(`SELECT Balance-Secured FROM dbprefix_wallets where WalletID = ?;`)
-	if err != nil {
-		return 0, err
+func (w *Wallet) Deposit(amount float64) error {
+	if amount <= 0 {
+		return ErrBadAmount
 	}
-	defer stmtRealtimeAvailableFund.Close()
+	stmtChargeAmount, err := sqlStatement(`UPDATE dbprefix_wallets 
+        SET Balance = Balance + ? 
+        WHERE WalletID = ?;`)
+	if err != nil {
+		return err
+	}
+	defer stmtChargeAmount.Close()
 
-	var available float64
-	err = stmtRealtimeAvailableFund.QueryRow(w.walletID).Scan(&available)
-	return available, err
+	_, err = stmtChargeAmount.Exec(amount, w.walletID)
+	return err
 }
 
 // Spend() is safe. i.e., it does not leave a negative balance
@@ -84,23 +166,16 @@ func (w *Wallet) Spend(amount float64) error {
 	return err
 }
 
-// Charge() is unsafe version of Spend().
-// It doesn't fail when user can't afford it.
-// USE ONLY FOR POST-USE BILLING
-func (w *Wallet) Charge(amount float64) error {
-	if amount <= 0 {
-		return ErrBadAmount
-	}
-	stmtChargeAmount, err := sqlStatement(`UPDATE dbprefix_wallets 
-        SET Balance = Balance - ? 
-        WHERE WalletID = ?;`)
+func (w *Wallet) Secured() (float64, error) {
+	stmtRealtimeSecuredFund, err := sqlStatement(`SELECT Secured FROM dbprefix_wallets where WalletID = ?;`)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	defer stmtChargeAmount.Close()
+	defer stmtRealtimeSecuredFund.Close()
 
-	_, err = stmtChargeAmount.Exec(amount, w.walletID)
-	return err
+	var secured float64
+	err = stmtRealtimeSecuredFund.QueryRow(w.walletID).Scan(&secured)
+	return secured, err
 }
 
 func (w *Wallet) SecureFund(amount float64) error {
@@ -112,24 +187,6 @@ func (w *Wallet) SecureFund(amount float64) error {
             WHEN Balance >= ? THEN Balance - ?
             ELSE (SELECT table_name FROM information_schema.tables)
         END), Secured = Secured + ? WHERE WalletID = ?;`)
-	if err != nil {
-		return err
-	}
-	defer stmtSecureAmount.Close()
-
-	_, err = stmtSecureAmount.Exec(amount, amount, amount, w.walletID)
-	return err
-}
-
-func (w *Wallet) UndoSecureFund(amount float64) error {
-	if amount <= 0 {
-		return ErrBadAmount
-	}
-	stmtSecureAmount, err := sqlStatement(`UPDATE dbprefix_wallets 
-        SET Secured = (CASE
-            WHEN Secured >= ? THEN Secured - ?
-            ELSE (SELECT table_name FROM information_schema.tables)
-        END), Balance = Balance + ? WHERE WalletID = ?;`)
 	if err != nil {
 		return err
 	}
@@ -157,18 +214,35 @@ func (w *Wallet) SpendSecured(amount float64) error {
 	return err
 }
 
-func (w *Wallet) Deposit(amount float64) error {
+func (w *Wallet) UndoSecureFund(amount float64) error {
 	if amount <= 0 {
 		return ErrBadAmount
 	}
-	stmtChargeAmount, err := sqlStatement(`UPDATE dbprefix_wallets 
-        SET Balance = Balance + ? 
-        WHERE WalletID = ?;`)
+	stmtSecureAmount, err := sqlStatement(`UPDATE dbprefix_wallets 
+        SET Secured = (CASE
+            WHEN Secured >= ? THEN Secured - ?
+            ELSE (SELECT table_name FROM information_schema.tables)
+        END), Balance = Balance + ? WHERE WalletID = ?;`)
 	if err != nil {
 		return err
 	}
-	defer stmtChargeAmount.Close()
+	defer stmtSecureAmount.Close()
 
-	_, err = stmtChargeAmount.Exec(amount, w.walletID)
+	_, err = stmtSecureAmount.Exec(amount, amount, amount, w.walletID)
 	return err
+}
+
+// Use Ed25519
+// TODO: Upload to Database
+func (w *Wallet) UploadPubkey(pubkey []byte, signature string /*, msg string = "UploadPubkey"*/) error {
+	var msg string = "UploadPubkey"
+
+	ed25519Master := jwt.SigningMethodEd25519{}
+	err := ed25519Master.Verify(msg, signature, pubkey)
+	return err
+}
+
+// TODO: VerifySignature()
+func (w *Wallet) VerifySignature(signature, data string) error {
+	return nil
 }
