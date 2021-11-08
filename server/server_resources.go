@@ -9,6 +9,6 @@ type ServerResourceGroup interface {
 }
 
 type ServerResourceAllocation struct {
-	UserAllocatedPercentageMap map[uint64]float64 // uint64 is user id
-	UserConsumedPercentageMap  map[uint64]float64 // uint64 is user id
+	ProductAllocatedPercentageMap map[uint64]float64 // uint64 is product id
+	ProductConsumedPercentageMap  map[uint64]float64 // uint64 is product id
 }
