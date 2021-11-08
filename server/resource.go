@@ -1,5 +1,11 @@
 package server
 
+// Known ResID
+const (
+	RES_TRAFFIC_USAGE uint64 = iota
+	RES_PORT_RESERVATION
+)
+
 type Resource struct {
 	ResID     uint64
 	Allocated float64
