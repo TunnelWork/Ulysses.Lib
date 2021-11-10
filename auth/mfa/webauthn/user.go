@@ -1,10 +1,12 @@
 package webauthn
 
 import (
+	"encoding/binary"
 	"encoding/json"
-	"fmt"
+	"strings"
 
 	"github.com/TunnelWork/Ulysses.Lib/auth"
+	"github.com/duo-labs/webauthn/protocol"
 	duo "github.com/duo-labs/webauthn/webauthn"
 )
 
@@ -50,7 +52,9 @@ func LoadUser(id uint64) (*User, error) {
 }
 
 func (u *User) WebAuthnID() []byte {
-	return []byte(fmt.Sprintf("%d", u.ID))
+	buf := make([]byte, binary.MaxVarintLen64)
+	binary.PutUvarint(buf, uint64(u.ID))
+	return buf
 }
 
 func (u *User) WebAuthnName() string {
@@ -58,7 +62,7 @@ func (u *User) WebAuthnName() string {
 }
 
 func (u *User) WebAuthnDisplayName() string {
-	return u.UserName
+	return strings.Split(u.UserName, "@")[0]
 }
 
 func (u *User) WebAuthnIcon() string {
@@ -79,4 +83,17 @@ func (u *User) UpdateDatabase() error {
 		return err
 	}
 	return nil
+}
+
+func (u *User) CredentialExcludeList() []protocol.CredentialDescriptor {
+	credentialExcludeList := []protocol.CredentialDescriptor{}
+	for _, cred := range u.AuthnCredentials {
+		descriptor := protocol.CredentialDescriptor{
+			Type:         protocol.PublicKeyCredentialType,
+			CredentialID: cred.ID,
+		}
+		credentialExcludeList = append(credentialExcludeList, descriptor)
+	}
+
+	return credentialExcludeList
 }

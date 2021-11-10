@@ -204,3 +204,30 @@ func DeleteTmpEntry(userID uint64, extentionType string, indexKey string) error 
 	_, err = stmtDeleteTmpEntry.Exec(userID, extentionType, indexKey)
 	return err
 }
+
+/*** Internal ***/
+func checkEnabledMFA(userID uint64) ([]string, error) {
+	stmtCheckEnabledMFA, err := sqlStatement(`SELECT extentionType FROM dbprefix_auth_mfa WHERE userID = ? AND enabled = TRUE;`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmtCheckEnabledMFA.Close()
+
+	rows, err := stmtCheckEnabledMFA.Query(userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var extentionTypes []string
+	for rows.Next() {
+		var extentionType string
+		err = rows.Scan(&extentionType)
+		if err != nil {
+			return nil, err
+		}
+		extentionTypes = append(extentionTypes, extentionType)
+	}
+
+	return extentionTypes, nil
+}

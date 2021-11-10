@@ -14,3 +14,7 @@ type MultiFactorAuthentication interface {
 	// Remove the MFA credential from the database
 	Remove(userID uint64) error
 }
+
+func EnabledMFA(userID uint64) ([]string, error) {
+	return checkEnabledMFA(userID)
+}

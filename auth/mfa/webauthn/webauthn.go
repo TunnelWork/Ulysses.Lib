@@ -5,11 +5,21 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	harpocrates "github.com/TunnelWork/Harpocrates"
 	"github.com/TunnelWork/Ulysses.Lib/auth"
 	"github.com/duo-labs/webauthn/protocol"
 	duo "github.com/duo-labs/webauthn/webauthn"
+)
+
+var (
+	ExampleWebAuthnConfig = map[string]string{
+		"RPDisplayName": "Ulysses Default DisplayName",
+		"RPID":          "localhost",
+		"RPOriginURL":   "http://localhost:8081",
+		"RPIconURL":     "http://localhost:8081/favicon.ico",
+	}
 )
 
 type WebAuthn struct {
@@ -18,9 +28,9 @@ type WebAuthn struct {
 }
 
 func NewWebAuthn(conf map[string]string) *WebAuthn {
-	RDDisplayName, ok := conf["RDDisplayName"]
+	RPDisplayName, ok := conf["RPDisplayName"]
 	if !ok {
-		RDDisplayName = "Ulysses Unknown Displayname"
+		RPDisplayName = "Ulysses Unknown Displayname"
 	}
 	RPID, ok := conf["RPID"]
 	if !ok {
@@ -35,7 +45,7 @@ func NewWebAuthn(conf map[string]string) *WebAuthn {
 		RPIconURL = ""
 	}
 	config := duo.Config{
-		RPDisplayName: RDDisplayName,
+		RPDisplayName: RPDisplayName,
 		RPID:          RPID,
 		RPOrigin:      RPOriginURL,
 		RPIcon:        RPIconURL,
@@ -68,13 +78,22 @@ func (w *WebAuthn) InitSignUp(userID uint64, username string) (map[string]interf
 		}
 	}
 
+	// fmt.Printf("ID: %s\n Name: %s\n DisplayName: %s\n", string(user.WebAuthnID()), user.WebAuthnName(), user.WebAuthnDisplayName())
+
+	registerOptions := func(credCreationOpts *protocol.PublicKeyCredentialCreationOptions) {
+		credCreationOpts.CredentialExcludeList = user.CredentialExcludeList()
+	}
+
 	options, sessionData, err := w.duoWebAuthn.BeginRegistration(
 		user,
+		registerOptions,
 	)
-
 	if err != nil {
 		return nil, err
 	}
+
+	// jsonOptions, _ := json.Marshal(options)
+	// fmt.Printf("%s\n", jsonOptions)
 
 	// save sessionData to tmp
 	sessionDataJson, err := json.Marshal(sessionData)
@@ -118,6 +137,8 @@ func (w *WebAuthn) CompleteSignUp(userID uint64, mfaConf map[string]string) erro
 		return err
 	}
 
+	_ = auth.DeleteTmpEntry(userID, "webauthn", sessionKey)
+
 	// verify userID
 	if string(sessionData.UserID) != string(user.WebAuthnID()) {
 		return errors.New("webauthn: session data userID mismatch")
@@ -155,25 +176,30 @@ func (w *WebAuthn) CompleteSignUp(userID uint64, mfaConf map[string]string) erro
 
 	parsedAttestationResponse, err := ccr.AttestationResponse.Parse()
 	if err != nil {
-		return err
+		return fmt.Errorf("webauthn: ccr.AttestationResponse.Parse(): %s", err.Error())
 	}
 
 	pcc.Response = *parsedAttestationResponse
 
 	shouldVerifyUser := w.duoWebAuthn.Config.AuthenticatorSelection.UserVerification == protocol.VerificationRequired
 	invalidErr := (&pcc).Verify(sessionData.Challenge, shouldVerifyUser, w.duoWebAuthn.Config.RPID, w.duoWebAuthn.Config.RPOrigin)
+	// clientDataOrigin, _ := url.Parse(pcc.Response.CollectedClientData.Origin)
+
 	if invalidErr != nil {
-		return invalidErr
+		return fmt.Errorf("webauthn: invalidErr: %s", invalidErr.Error())
 	}
 
 	credential, err := duo.MakeNewCredential(&pcc)
 	if err != nil {
-		return err
+		return fmt.Errorf("webauthn: MakeNewCredential: %s", err.Error())
 	}
 
 	user.AuthnCredentials = append(user.AuthnCredentials, *credential)
 	err = user.UpdateDatabase()
-	return err
+	if err != nil {
+		return err
+	}
+	return auth.ConfirmMFA(userID, "webauthn")
 }
 
 func (w *WebAuthn) NewChallenge(userID uint64) (map[string]interface{}, error) {
@@ -228,6 +254,8 @@ func (w *WebAuthn) SubmitChallenge(userID uint64, challengeResponse map[string]s
 	if err != nil {
 		return err
 	}
+
+	_ = auth.DeleteTmpEntry(userID, "webauthn", sessionKey)
 
 	if string(sessionData.UserID) != string(user.WebAuthnID()) {
 		return errors.New("webauthn: session data userID mismatch")

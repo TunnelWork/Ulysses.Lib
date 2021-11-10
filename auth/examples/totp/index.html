@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>TOTP Demo</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <script src="./qrcode.min.js"></script>
+</head>
+
+<body>
+    <div>
+        <h1>Start Registration</h1>
+        Username:
+        <br>
+        <input type="text" name="regUserName" id="regUserName" placeholder="i.e. foo@bar.com">
+        UserID:
+        <br>
+        <input type="text" name="regUserID" id="regUserID">
+        <br>
+        <button onclick="InitAddUser()">Register</button>
+    </div>
+    <div>
+        <h1>Finish Registration</h1>
+        <div id="QRcode"></div>
+        <div id="Secret"></div>
+        TOTP Code:
+        <br>
+        <input type="text" name="regCode" id="regCode" placeholder="i.e. 000000">
+        <br>
+        <button onclick="VerifyAddUser()">Verify</button>
+    </div>
+    <div>
+        <h1>Login</h1>
+        UserID:
+        <br>
+        <input type="text" name="loginUserID" id="loginUserID">
+        TOTP Code:
+        <br>
+        <input type="text" name="loginCode" id="loginCode" placeholder="i.e. 000000">
+        <br>
+        <button onclick="Login()">Register</button>
+    </div>
+<script src="./scripts.js"></script>
+</body>
+
+</html>
