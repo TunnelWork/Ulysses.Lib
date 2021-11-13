@@ -1,182 +1,137 @@
 package billing
 
-import "time"
+import (
+	"errors"
+	"time"
+)
+
+var (
+	ErrInvalidSerialNumber = errors.New("billing: invalid serial number")
+	ErrInvalidOwnerID      = errors.New("billing: invalid owner ID, need OwnerUserID or OwnerAffiliationID")
+	ErrInvalidProductID    = errors.New("billing: invalid product ID")
+	ErrInvalidWalletID     = errors.New("billing: invalid wallet ID")
+)
 
 type Product struct {
-	ProductID uint64
+	serialNumber uint64 // primary key
 
-	// Ownership
-	OwnerID uint64
+	// Ownership. At least one must be set.
+	// if both are set, the product is treated
+	// as a private owned product.
+	OwnerUserID        uint64
+	OwnerAffiliationID uint64
 
-	// Server-Account binding
-	ServerType string
-	InstanceID string
+	// // Server-Account binding -- moved
+	// ServerType string
+	// InstanceID string
 
 	// billing/payment
-	DateCreation    time.Time // Accurate to DAY only
-	DateTermination time.Time // Accurate to DAY only
-	BillingCycle    BillingCycle
+	ProductID       uint64    // identifier for product type, description, pricing, etc.
+	dateCreation    time.Time // Accurate to DAY only
+	dateTermination time.Time // Accurate to DAY only
+	BillingCycle    uint8
 	WalletID        uint64
+}
 
-	// //// Only for BillingCycle: PayAsYouGo
-	// HourlyRate              float64
-	// MonthlySpendingCap      float64 // This is the total amount secured.
-	// CurrentMonthExpenditure float64 // This is the amount already spent.
+func (p *Product) SerialNumber() uint64 {
+	return p.serialNumber
+}
 
-	// //// Only for non-PayAsYouGo BillingCycle:
-	// NextBillingDate time.Time
-	// RecurringRate   float64
+func (p *Product) DateCreation() time.Time {
+	return p.dateCreation
+}
+
+func (p *Product) DateTermination() time.Time {
+	return p.dateTermination
+}
+
+func (p *Product) Add() error {
+	return AddProduct(p)
+}
+
+func (p *Product) Update() error {
+	return UpdateProduct(p)
+}
+
+func (p *Product) Terminate() error {
+	return TerminateProductBySerialNumber(p.serialNumber)
 }
 
 // Add entry to database
-func AddProduct(product Product) error {
-	stmtInsertProduct, err := sqlStatement(`INSERT INTO dbprefix_products 
-    (OwnerID, ServerType, InstanceID, DateCreation, BillingCycle, WalletID) 
-    VALUE
-    (?, ?, ?, CURDATE(), ?, ?)`)
-	if err != nil {
-		return err
+func AddProduct(product *Product) error {
+	// Verify all fields are valid
+	// Belong to either an Affiliation (shared) or a User (owned)
+	if product.OwnerUserID == 0 || product.OwnerAffiliationID == 0 {
+		return ErrInvalidOwnerID
 	}
-	defer stmtInsertProduct.Close()
+	if product.ProductID == 0 {
+		return ErrInvalidProductID
+	}
+	if product.WalletID == 0 {
+		return ErrInvalidWalletID
+	}
 
-	_, err = stmtInsertProduct.Exec(
-		product.OwnerID,
-		product.ServerType,
-		product.InstanceID,
-		product.BillingCycle,
-		product.WalletID,
-	)
-	return err
+	return addProduct(product)
 }
 
-// For user viewing. Caller should do local pagination
-func ListUserProducts(ownerID uint64) ([]Product, error) {
-	stmtListUserProducts, err := sqlStatement(`SELECT ProductID, ServerType, InstanceID, DateCreation, DateTermination, BillingCycle, WalletID FROM dbprefix_products WHERE OwnerID = ?;`)
-	if err != nil {
-		return nil, err
-	}
-	defer stmtListUserProducts.Close()
-
-	rows, err := stmtListUserProducts.Query(ownerID)
-	if err != nil {
-		return nil, err
-	}
-	var products []Product
-	for rows.Next() {
-		var product Product = Product{
-			OwnerID: ownerID,
-		}
-		if err := rows.Scan(&product.ProductID, &product.ServerType, &product.InstanceID,
-			&product.DateCreation, &product.DateTermination, &product.BillingCycle,
-			&product.WalletID); err != nil {
-			return products, err
-		}
-		products = append(products, product)
-	}
-	err = rows.Err()
-	return products, err
+func GetProductBySerialNumber(serialNumber uint64) (*Product, error) {
+	return getProductBySerialNumber(serialNumber)
 }
 
-// For admin viewing. Caller should do local pagination
-func ListAllProducts() ([]Product, error) {
-	stmtListAllProducts, err := sqlStatement(`SELECT ProductID, OwnerID, ServerType, InstanceID, DateCreation, DateTermination, BillingCycle, WalletID FROM dbprefix_products;`)
-	if err != nil {
-		return nil, err
+func UpdateProduct(product *Product) error {
+	// Verify all fields are valid
+	if product.serialNumber == 0 {
+		// Invalid
+		return ErrInvalidSerialNumber
 	}
-	defer stmtListAllProducts.Close()
 
-	rows, err := stmtListAllProducts.Query()
-	if err != nil {
-		return nil, err
+	// Belong to either an Affiliation (shared) or a User (owned)
+	if product.OwnerUserID == 0 || product.OwnerAffiliationID == 0 {
+		return ErrInvalidOwnerID
 	}
-	var products []Product
-	for rows.Next() {
-		var product Product
-		if err := rows.Scan(&product.ProductID, &product.OwnerID, &product.ServerType, &product.InstanceID,
-			&product.DateCreation, &product.DateTermination, &product.BillingCycle,
-			&product.WalletID); err != nil {
-			return products, err
-		}
-		products = append(products, product)
+	if product.ProductID == 0 {
+		return ErrInvalidProductID
 	}
-	err = rows.Err()
-	return products, err
+	if product.WalletID == 0 {
+		return ErrInvalidWalletID
+	}
+
+	return updateProduct(product)
 }
 
-// For billing purposes
-func ListActiveProductsByBillingCycle(billingCycle BillingCycle) ([]Product, error) {
-	stmtListActiveProducts, err := sqlStatement(`SELECT ProductID, OwnerID, ServerType, InstanceID, DateCreation, BillingCycle, WalletID FROM dbprefix_products WHERE DateTermination = 0;`)
-	if err != nil {
-		return nil, err
-	}
-	defer stmtListActiveProducts.Close()
-
-	rows, err := stmtListActiveProducts.Query()
-	if err != nil {
-		return nil, err
-	}
-	var products []Product
-	for rows.Next() {
-		var product Product = Product{
-			DateTermination: time.Time{},
-		}
-		if err := rows.Scan(&product.ProductID, &product.OwnerID, &product.ServerType, &product.InstanceID,
-			&product.DateCreation, &product.BillingCycle,
-			&product.WalletID); err != nil {
-			return products, err
-		}
-		products = append(products, product)
-	}
-	err = rows.Err()
-	return products, err
+func TerminateProductBySerialNumber(serialNumber uint64) error {
+	return terminateProductBySerialNumber(serialNumber)
 }
 
-func SelectProduct(productID uint64) (Product, error) {
-	var product Product
-	stmtSelectProduct, err := sqlStatement(`SELECT OwnerID, ServerType, InstanceID, DateCreation, DateTermination, BillingCycle, WalletID FROM dbprefix_products WHERE ProductID = ?;`)
-	if err != nil {
-		return product, err
-	}
-	defer stmtSelectProduct.Close()
-
-	err = stmtSelectProduct.QueryRow().Scan(&product.OwnerID, &product.ServerType, &product.InstanceID,
-		&product.DateCreation, &product.DateTermination, &product.BillingCycle, &product.WalletID)
-	return product, err
+// For user viewing.
+// Lists all products owned by the user.
+// Client should implement local-pagination to reduce need of repeated query
+// API Server should hide dateTermination in reponse, if dateTermination is earlier than dateCreation
+func ListUserProducts(ownerUserID uint64) ([]*Product, error) {
+	return listUserProducts(ownerUserID)
 }
 
-// UpdateProduct() effectively updates OwnerID, ServerType, InstanceID, WalletID
-// for the product specified by ProductID
-func UpdateProduct(productID uint64, product Product) error {
-	stmtUpdateProduct, err := sqlStatement(`UPDATE dbprefix_products SET
-    OwnerID = ?, ServerType = ?, InstanceID = ?, WalletID = ?
-    WHERE
-    ProductID = ?;`)
-	if err != nil {
-		return err
-	}
-	defer stmtUpdateProduct.Close()
-
-	_, err = stmtUpdateProduct.Exec(product.OwnerID, product.ServerType, product.InstanceID, product.WalletID, product.ProductID)
-	return err
+// For affliation user viewing.
+// Lists all products owned by the affiliation, including both shared and private owned products.
+// Client should implement local-pagination to reduce need of repeated query
+// Client should mark private products (ownerUserID != 0) as private
+// API Server should hide dateTermination in response, if dateTermination is earlier than dateCreation
+func ListAffiliationProducts(ownerAffiliationID uint64) ([]*Product, error) {
+	return listAffiliationProducts(ownerAffiliationID)
 }
 
-// Terminates the product
-func TerminateProduct(ProductID uint64) error {
-	stmtTerminateProduct, err := sqlStatement(`UPDATE dbprefix_products SET DateTermination = CURDATE() WHERE ProductID = ?;`)
-	if err != nil {
-		return err
-	}
-	defer stmtTerminateProduct.Close()
-
-	_, err = stmtTerminateProduct.Exec(ProductID)
-	return err
+// For admin viewing.
+func ListProductsByProductID(productID uint64) ([]*Product, error) {
+	return listProductsByProductID(productID)
 }
 
-type BillingCycle uint8
+// For automated-billing purposes.
+// Designed for Pay-As-You-Go billing. But may be used for other purposes later?
+func ListActiveProductsByBillingCycle(billingCycle uint8) ([]*Product, error) {
+	return listActiveProductsByBillingCycle(billingCycle)
+}
 
-const (
-	PayAsYouGo BillingCycle = iota
-	PerMonth
-	PerQuarter
-	PerYear
-)
+// For admin viewing. Client should implement local-pagination
+func ListAllProducts() ([]*Product, error) {
+	return listAllProducts()
+}
