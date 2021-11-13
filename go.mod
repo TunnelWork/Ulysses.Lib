@@ -7,7 +7,6 @@ require (
 	github.com/duo-labs/webauthn v0.0.0-20210727191636-9f1b88ef44cc
 	github.com/gin-gonic/gin v1.7.4
 	github.com/go-sql-driver/mysql v1.6.0
-	github.com/golang-jwt/jwt/v4 v4.1.0
 	github.com/pquerna/otp v1.3.0
 )
 
@@ -20,6 +19,7 @@ require (
 	github.com/go-playground/locales v0.13.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-playground/validator/v10 v10.4.1 // indirect
+	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
 	github.com/golang/protobuf v1.3.3 // indirect
 	github.com/google/certificate-transparency-go v1.0.21 // indirect
 	github.com/json-iterator/go v1.1.9 // indirect
