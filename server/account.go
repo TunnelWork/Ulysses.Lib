@@ -1,6 +1,6 @@
 package server
 
 type Account interface {
-	Credentials() (AccountCredentials, error)
-	ResourceGroup() (AccountResourceGroup, error)
+	Credentials() (Credentials, error)
+	Resources() ([]*Resource, error)
 }

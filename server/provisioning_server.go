@@ -8,13 +8,6 @@ package server
 // Server should implement required mechanisms to reflect it
 
 type ProvisioningServer interface {
-	/// Server
-
-	// ResourceGroup() shows usage statistics of all allocatable resources on the server
-	ResourceGroup() ServerResourceGroup
-
-	//// Account
-
 	// CreateAccount() utilizes internal server configuration and aconf pased in to create a series of accounts with
 	// same sconf and variable aconf in order.
 	CreateAccount(productID uint64, accountConfiguration interface{}) error
@@ -33,8 +26,9 @@ type ProvisioningServer interface {
 	SuspendAccount(productID uint64) error
 	UnsuspendAccount(productID uint64) error
 
-	// PurgeResourceUsage sets all USED resource counter to 0 for all users.
-	// usecase: clean-reinstall
-	// Won't be automatically called on a time-basis. Not a cronjob mounting point.
-	PurgeResourceUsage()
+	// Monthly Refresh Usage
+	RefreshAccount(productID uint64) error
+
+	// // ResourceGroup() shows usage statistics of all allocatable resources on the server
+	// ResourceGroup() ServerResourceGroup
 }
