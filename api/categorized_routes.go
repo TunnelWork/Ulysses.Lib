@@ -44,6 +44,7 @@ func AuthedCPOST(category uint8, relativePath string, userGroup string, handler 
 
 // CGET() stands for Categorized GET
 // CGET(Payment, "dummy/test", f) will register f() as example.com/api/payment/dummy/test for GET method
+// Not validating the authentication header.
 func CGET(category uint8, relativePath string, handler ...*gin.HandlerFunc) error {
 	if category, exist := availableCategories[category]; exist {
 		return get(category+relativePath, handler...)
@@ -54,6 +55,7 @@ func CGET(category uint8, relativePath string, handler ...*gin.HandlerFunc) erro
 
 // CPOST() stands for Categorized POST
 // CPOST(Payment, "dummy/test", f) will register f() as example.com/api/payment/dummy/test for POST method
+// Not validating the authentication header.
 func CPOST(category uint8, relativePath string, handler ...*gin.HandlerFunc) error {
 	if category, exist := availableCategories[category]; exist {
 		return post(category+relativePath, handler...)

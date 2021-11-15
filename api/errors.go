@@ -13,4 +13,7 @@ var (
 	ErrRepeatPostPath error = errors.New("api: repeated path for POST method")
 
 	ErrUnknownUserGroup error = errors.New("api: usergroup has no known access control function")
+
+	ErrInvalidUserGroup          error = errors.New("api: invalid usergroup")
+	ErrAccessControlFuncNotFound error = errors.New("api: access control function not found")
 )

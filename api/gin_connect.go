@@ -12,12 +12,14 @@ func FinalizeGinEngine(router *gin.Engine, pathPrefix string) {
 	mapMutex.RLock()
 	defer mapMutex.RUnlock()
 
-	// Safety measure: trim-off all leading/ending slashes (/)
-	for pathPrefix[0] == '/' {
-		pathPrefix = pathPrefix[1:] // trim off the first character
-	}
-	for pathPrefix[len(pathPrefix)-1] == '/' {
-		pathPrefix = pathPrefix[:len(pathPrefix)-1] // trim off the last character
+	if len(pathPrefix) > 0 {
+		// Safety measure: trim-off all leading/ending slashes (/)
+		for pathPrefix[0] == '/' {
+			pathPrefix = pathPrefix[1:] // trim off the first character
+		}
+		for pathPrefix[len(pathPrefix)-1] == '/' {
+			pathPrefix = pathPrefix[:len(pathPrefix)-1] // trim off the last character
+		}
 	}
 
 	// For non empty pathPrefix, append ending slash to make it a path.

@@ -12,11 +12,44 @@ var (
 	mapAccessControlFunc map[string][]*gin.HandlerFunc = map[string][]*gin.HandlerFunc{}
 )
 
-func RegisterAccessControlFunc(userGroup string, acFuncs ...*gin.HandlerFunc) {
+// RegisterAccessControlFunc wipes all existing Access Control Funcs and replace it with the new ones
+func RegisterAccessControlFuncs(userGroup string, acFuncs ...*gin.HandlerFunc) {
 	mapAccessMutex.Lock()
 	defer mapAccessMutex.Unlock()
 
 	mapAccessControlFunc[userGroup] = acFuncs
+}
+
+// AppendAccessControlFunc adds new Access Control Funcs after the existing ones
+func AppendAccessControlFuncs(userGroup string, acFuncs ...*gin.HandlerFunc) {
+	mapAccessMutex.Lock()
+	defer mapAccessMutex.Unlock()
+
+	if _, ok := mapAccessControlFunc[userGroup]; !ok {
+		mapAccessControlFunc[userGroup] = acFuncs
+	}
+
+	mapAccessControlFunc[userGroup] = append(mapAccessControlFunc[userGroup], acFuncs...)
+}
+
+// InheritAccessControlFunc inherits Access Control Funcs from parent user group
+// if the userGroup exists, it appends parent's Access Control Funcs after the existing ones
+func InheritAccessControlFuncs(userGroup string, parentUserGroup string) error {
+	mapAccessMutex.Lock()
+	defer mapAccessMutex.Unlock()
+
+	// Check if parent exists
+	if _, ok := mapAccessControlFunc[parentUserGroup]; !ok {
+		return ErrAccessControlFuncNotFound
+	}
+
+	if _, ok := mapAccessControlFunc[userGroup]; !ok {
+		mapAccessControlFunc[userGroup] = mapAccessControlFunc[parentUserGroup]
+	} else {
+		mapAccessControlFunc[userGroup] = append(mapAccessControlFunc[userGroup], mapAccessControlFunc[parentUserGroup]...)
+	}
+
+	return nil
 }
 
 func getAccessControlFunc(userGroup string) ([]*gin.HandlerFunc, error) {
