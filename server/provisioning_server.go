@@ -10,24 +10,24 @@ package server
 type ProvisioningServer interface {
 	// CreateAccount() utilizes internal server configuration and aconf pased in to create a series of accounts with
 	// same sconf and variable aconf in order.
-	CreateAccount(productID uint64, accountConfiguration interface{}) error
+	CreateAccount(productSN uint64, accountConfiguration interface{}) error
 
 	// ReadAccount() returns an ServerAccount-compatible struct
-	GetAccount(productID uint64) (Account, error)
+	GetAccount(productSN uint64) (Account, error)
 
 	// UpdateAccount() utilizes internal server configuration and aconf pased in to update a series of accounts
-	// specified by productID.
-	UpdateAccount(productID uint64, accountConfiguration interface{}) error
+	// specified by productSN.
+	UpdateAccount(productSN uint64, accountConfiguration interface{}) error
 
 	// DeleteAccount() utilizes internal server configuration to delete a series of accounts specified by accID.
-	DeleteAccount(productID uint64) error
+	DeleteAccount(productSN uint64) error
 
 	// Temporarily disable an account from being used or recover it
-	SuspendAccount(productID uint64) error
-	UnsuspendAccount(productID uint64) error
+	SuspendAccount(productSN uint64) error
+	UnsuspendAccount(productSN uint64) error
 
 	// Monthly Refresh Usage
-	RefreshAccount(productID uint64) error
+	RefreshAccount(productSN uint64) error
 
 	// // ResourceGroup() shows usage statistics of all allocatable resources on the server
 	// ResourceGroup() ServerResourceGroup
