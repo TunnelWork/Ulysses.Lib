@@ -16,7 +16,12 @@ type Wallet struct {
 func UserWallet(ownerID uint64) (*Wallet, error) {
 	wallet, err := userWallet(ownerID)
 	if err == sql.ErrNoRows {
-		return createUserWallet(ownerID)
+		id, err := createUserWallet(ownerID)
+		if err != nil {
+			return nil, err
+		}
+		wallet, err = getWalletByID(id)
+		return wallet, err
 	}
 	return wallet, err
 }
