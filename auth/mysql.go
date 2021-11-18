@@ -12,7 +12,7 @@ var (
 
 /************ Helper Functions ************/
 func sqlStatement(query string) (*sql.Stmt, error) {
-	prefixUpdatedQuery := strings.Replace(query, "dbprefix_", tblPrefix, -1)
+	prefixUpdatedQuery := strings.ReplaceAll(query, "dbprefix_", tblPrefix)
 
 	return db.Prepare(prefixUpdatedQuery)
 }
