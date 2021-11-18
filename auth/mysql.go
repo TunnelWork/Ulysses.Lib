@@ -158,7 +158,7 @@ func getUserByID(userID uint64) (*User, error) {
 	return &user, nil
 }
 
-func getUserByEmailPassword(email string, password string) (*User, error) {
+func getUserByEmailPassword(email, password string) (*User, error) {
 	stmtGetUserByEmailPassword, err := sqlStatement(`SELECT id, email, password, role, affiliation FROM dbprefix_auth_user WHERE email = ? AND password = ?;`)
 	if err != nil {
 		return nil, err
@@ -360,7 +360,7 @@ func updateAffiliation(affiliation *Affiliation) error {
 /************ MFA Database ************/
 
 // Create
-func InitMFA(userID uint64, extentionType string, extentionData string) error {
+func InitMFA(userID uint64, extentionType, extentionData string) error {
 	stmtInsertExtention, err := sqlStatement(`INSERT INTO dbprefix_auth_mfa (userID, extentionType, extentionData) VALUES (?, ?, ?);`)
 	if err != nil {
 		return err
@@ -418,7 +418,7 @@ func ConfirmMFA(userID uint64, extentionType string) error {
 }
 
 // Update
-func UpdateMFA(userID uint64, extentionType string, extentionData string) error {
+func UpdateMFA(userID uint64, extentionType, extentionData string) error {
 	stmtUpdateExtention, err := sqlStatement(`UPDATE dbprefix_auth_mfa SET extentionData = ? WHERE userID = ? AND extentionType = ?;`)
 	if err != nil {
 		return err
@@ -443,7 +443,7 @@ func ClearMFA(userID uint64, extentionType string) error {
 
 /************ Temporary Database ************/
 // Create
-func InsertTmpEntry(userID uint64, extentionType string, indexKey string, storedValue string) error {
+func InsertTmpEntry(userID uint64, extentionType, indexKey, storedValue string) error {
 	stmtInsertTmpEntry, err := sqlStatement(`INSERT INTO dbprefix_tmp_auth 
 	(userID, extentionType, indexKey, storedValue, expiry) 
     VALUES (?, ?, ?, ?, NOW() + INTERVAL 1 DAY );`)
@@ -457,7 +457,7 @@ func InsertTmpEntry(userID uint64, extentionType string, indexKey string, stored
 }
 
 // Read
-func ReadTmpEntry(userID uint64, extentionType string, indexKey string) (string, error) {
+func ReadTmpEntry(userID uint64, extentionType, indexKey string) (string, error) {
 	stmtReadTmpEntry, err := sqlStatement(`SELECT storedValue FROM dbprefix_tmp_auth WHERE userID = ? AND extentionType = ? AND indexKey = ?;`)
 	if err != nil {
 		return "", err
@@ -474,7 +474,7 @@ func ReadTmpEntry(userID uint64, extentionType string, indexKey string) (string,
 }
 
 // Update
-func UpdateTmpEntry(userID uint64, extentionType string, indexKey string, storedValue string) error {
+func UpdateTmpEntry(userID uint64, extentionType, indexKey, storedValue string) error {
 	stmtUpdateTmpEntry, err := sqlStatement(`UPDATE dbprefix_tmp_auth SET storedValue = ? WHERE userID = ? AND extentionType = ? AND indexKey = ?;`)
 	if err != nil {
 		return err
@@ -486,7 +486,7 @@ func UpdateTmpEntry(userID uint64, extentionType string, indexKey string, stored
 }
 
 // Delete
-func DeleteTmpEntry(userID uint64, extentionType string, indexKey string) error {
+func DeleteTmpEntry(userID uint64, extentionType, indexKey string) error {
 	stmtDeleteTmpEntry, err := sqlStatement(`DELETE FROM dbprefix_tmp_auth WHERE userID = ? AND extentionType = ? AND indexKey = ?;`)
 	if err != nil {
 		return err

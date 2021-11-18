@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AuthedGET(relativePath string, userGroup string, handler ...*gin.HandlerFunc) error {
+func AuthedGET(relativePath, userGroup string, handler ...*gin.HandlerFunc) error {
 	acFuncs, acErr := getAccessControlFunc(userGroup)
 	if acErr != nil {
 		return acErr
@@ -16,7 +16,7 @@ func AuthedGET(relativePath string, userGroup string, handler ...*gin.HandlerFun
 	return get(relativePath, append(acFuncs, handler...)...)
 }
 
-func AuthedPOST(relativePath string, userGroup string, handler ...*gin.HandlerFunc) error {
+func AuthedPOST(relativePath, userGroup string, handler ...*gin.HandlerFunc) error {
 	acFuncs, acErr := getAccessControlFunc(userGroup)
 	if acErr != nil {
 		return acErr

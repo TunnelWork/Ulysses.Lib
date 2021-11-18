@@ -120,7 +120,7 @@ func (pl *ProductListing) Reactivate() error {
 	}
 }
 
-func (pl *ProductListing) CreateProduct(ownerUserID uint64, ownerAffiliationID uint64, BillingCycle uint8, WalletID uint64) (*Product, error) {
+func (pl *ProductListing) CreateProduct(ownerUserID, ownerAffiliationID uint64, BillingCycle uint8, WalletID uint64) (*Product, error) {
 	if pl.discontinued {
 		return nil, errors.New("billing: product is discontinued")
 	}

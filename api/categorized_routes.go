@@ -24,7 +24,7 @@ var availableCategories map[uint8]string = map[uint8]string{
 	Server:          "server/",
 }
 
-func AuthedCGET(category uint8, relativePath string, userGroup string, handler ...*gin.HandlerFunc) error {
+func AuthedCGET(category uint8, relativePath, userGroup string, handler ...*gin.HandlerFunc) error {
 	acFuncs, acErr := getAccessControlFunc(userGroup)
 	if acErr != nil {
 		return acErr
@@ -33,7 +33,7 @@ func AuthedCGET(category uint8, relativePath string, userGroup string, handler .
 	return CGET(category, relativePath, append(acFuncs, handler...)...)
 }
 
-func AuthedCPOST(category uint8, relativePath string, userGroup string, handler ...*gin.HandlerFunc) error {
+func AuthedCPOST(category uint8, relativePath, userGroup string, handler ...*gin.HandlerFunc) error {
 	acFuncs, acErr := getAccessControlFunc(userGroup)
 	if acErr != nil {
 		return acErr
