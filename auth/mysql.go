@@ -213,7 +213,11 @@ func emailExists(email string) (bool, error) {
 	var id uint64
 	err = stmtCheckEmailExists.QueryRow(email).Scan(&id)
 	if err != nil {
-		return false, err
+		if err == sql.ErrNoRows {
+			return false, nil
+		} else {
+			return false, err
+		}
 	}
 
 	return true, nil
