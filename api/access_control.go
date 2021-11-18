@@ -34,7 +34,7 @@ func AppendAccessControlFuncs(userGroup string, acFuncs ...*gin.HandlerFunc) {
 
 // InheritAccessControlFunc inherits Access Control Funcs from parent user group
 // if the userGroup exists, it appends parent's Access Control Funcs after the existing ones
-func InheritAccessControlFuncs(userGroup string, parentUserGroup string) error {
+func InheritAccessControlFuncs(userGroup, parentUserGroup string) error {
 	mapAccessMutex.Lock()
 	defer mapAccessMutex.Unlock()
 

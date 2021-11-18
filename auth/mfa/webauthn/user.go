@@ -19,7 +19,7 @@ type User struct {
 	// SessionMap       map[string]duo.SessionData // Load from DB (if any)
 }
 
-func CreateNewUser(id uint64, name string, iconURL string) (*User, error) {
+func CreateNewUser(id uint64, name, iconURL string) (*User, error) {
 	user := User{
 		ID:               id,
 		UserName:         name,

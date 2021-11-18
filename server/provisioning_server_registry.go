@@ -22,7 +22,7 @@ func RegisterServer(serverTypeName string, serverGen ProvisioningServerGen) {
 // NewProvisioningServer returns a ProvisioningServer interface specified by serverType according to the ServerRegistrarMap
 // the internal state of the returned Server interface should reflect serverConfiguration.
 // A Server implementation should utilize this function to instantiate a ProvisioningServer struct with known name.
-func NewProvisioningServer( /*db *sql.DB, */ serverType string, instanceID string, serverConfiguration interface{}) (ProvisioningServer, error) {
+func NewProvisioningServer(serverType, instanceID string, serverConfiguration interface{}) (ProvisioningServer, error) {
 	if svGen, ok := psRegManagers[serverType]; ok {
 		return svGen( /*db, */ instanceID, serverConfiguration)
 	} else {

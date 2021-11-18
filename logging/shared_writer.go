@@ -63,7 +63,7 @@ type customWriter struct {
 	suffix string
 }
 
-func NewCustomWriter(prefix string, suffix string) *customWriter {
+func NewCustomWriter(prefix, suffix string) *customWriter {
 	return &customWriter{
 		prefix: prefix,
 		suffix: suffix,

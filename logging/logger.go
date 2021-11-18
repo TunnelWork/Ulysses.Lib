@@ -170,7 +170,7 @@ func (dl *dualLogger) Fatal(v ...interface{}) {
 	dl._fatal(v)
 }
 
-func (dl *dualLogger) Writer(prefix string, suffix string) io.Writer {
+func (dl *dualLogger) Writer(prefix, suffix string) io.Writer {
 	return &dualLoggerWriter{
 		_write: func(p []byte) (n int, err error) {
 			dl.mutex.Lock()
