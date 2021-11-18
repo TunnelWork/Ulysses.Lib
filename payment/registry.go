@@ -23,7 +23,7 @@ func RegisterPrepaidGateway(gatewayTypeName string, genFunc PrepaidGatewayGen) {
 // NewPrepaidGateway() creates a PrepaidGateway in the type of gatewayTypeName
 // with the specified instanceID, which supports the duplicapability for each gatewayType.
 // Note: it is caller's responsibility to make sure the *sql.DB is alive.
-func NewPrepaidGateway(db *sql.DB, gatewayTypeName, instanceID string, initConf interface{}) (PrepaidGateway, error) {
+func NewPrepaidGateway(gatewayTypeName, instanceID string, initConf interface{}) (PrepaidGateway, error) {
 	if genFunc, ok := prepaidGatewayRegistry[gatewayTypeName]; ok {
 		return genFunc(db, instanceID, initConf)
 	} else {
