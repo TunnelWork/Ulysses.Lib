@@ -22,7 +22,7 @@ func NewTOTP(conf map[string]string) *TOTP {
 	}
 }
 
-func (t *TOTP) Registered(userID uint64) bool {
+func (*TOTP) Registered(userID uint64) bool {
 	enabled, err := auth.MFAEnabled(userID, "utotp")
 	if err != nil {
 		return false
@@ -56,7 +56,7 @@ func (t *TOTP) InitSignUp(userID uint64, username string) (map[string]interface{
 	}, nil
 }
 
-func (t *TOTP) CompleteSignUp(userID uint64, mfaConf map[string]string) error {
+func (*TOTP) CompleteSignUp(userID uint64, mfaConf map[string]string) error {
 	// Verify if all required params are present
 	secret, ok := mfaConf["secret"]
 	if !ok {
@@ -115,6 +115,6 @@ func (t *TOTP) SubmitChallenge(userID uint64, challengeResponse map[string]strin
 	return nil
 }
 
-func (t *TOTP) Remove(userID uint64) error {
+func (*TOTP) Remove(userID uint64) error {
 	return auth.ClearMFA(userID, "utotp")
 }

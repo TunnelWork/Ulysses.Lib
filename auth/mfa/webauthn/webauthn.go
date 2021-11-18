@@ -60,7 +60,7 @@ func NewWebAuthn(conf map[string]string) *WebAuthn {
 	}
 }
 
-func (w *WebAuthn) Registered(userID uint64) bool {
+func (*WebAuthn) Registered(userID uint64) bool {
 	result, err := auth.MFAEnabled(userID, "webauthn")
 	if err != nil {
 		return false
@@ -383,6 +383,6 @@ func (w *WebAuthn) SubmitChallenge(userID uint64, challengeResponse map[string]s
 	return nil
 }
 
-func (w *WebAuthn) Remove(userID uint64) error {
+func (*WebAuthn) Remove(userID uint64) error {
 	return auth.ClearMFA(userID, "webauthn")
 }

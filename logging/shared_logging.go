@@ -42,7 +42,7 @@ func Init(loggerConfig LoggerConfig) error {
 	}
 	verboseLogging = loggerConfig.Verbose
 	if loggerConfig.Filepath != "" {
-		f, err := os.OpenFile(loggerConfig.Filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		f, err := os.OpenFile(loggerConfig.Filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644) // skipcq: GSC-G302
 		if err != nil {
 			return err // ErrBadOpenFIle
 		}

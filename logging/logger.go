@@ -49,7 +49,7 @@ func DualLogger(conf LoggerConfig, wg *sync.WaitGroup, exFn *func()) *dualLogger
 	}
 
 	if dl.config.Filepath != "" {
-		f, err := os.OpenFile(dl.config.Filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		f, err := os.OpenFile(dl.config.Filepath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644) // skipcq: GSC-G302
 		if err != nil {
 			return nil // ErrBadOpenFIle
 		}
