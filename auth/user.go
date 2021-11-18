@@ -43,6 +43,10 @@ func GetUsersByAffiliationID(affiliationID uint64) ([]*User, error) {
 	return getUsersByAffiliationID(affiliationID)
 }
 
+func (user *User) ID() uint64 {
+	return user.id
+}
+
 // CreateUser should be called when registering a new user
 func (user *User) CreateUser() error {
 	exist, err := user.UserEmailExists()
