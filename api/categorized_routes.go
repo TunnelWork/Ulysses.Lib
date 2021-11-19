@@ -8,6 +8,8 @@ import (
 // choose a category to register the API endpoints.
 const (
 	Assets uint8 = iota
+	Auth
+	Billing
 	Internal
 	Payment
 	PaymentCallback
@@ -17,6 +19,8 @@ const (
 
 var availableCategories map[uint8]string = map[uint8]string{
 	Assets:          "assets/",
+	Auth:            "auth/",
+	Billing:         "billing/",
 	Internal:        "internal/",
 	Payment:         "payment/",
 	PaymentCallback: "payment/callback/",
