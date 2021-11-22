@@ -28,30 +28,52 @@ var availableCategories map[uint8]string = map[uint8]string{
 	Server:          "server/",
 }
 
-func AuthedCGET(category uint8, relativePath, userGroup string, handler ...*gin.HandlerFunc) error {
+func AuthedCGET(category uint8, relativePath, userGroup string, handler ...interface{}) error {
 	acFuncs, acErr := getAccessControlFunc(userGroup)
 	if acErr != nil {
 		return acErr
 	}
 
-	return CGET(category, relativePath, append(acFuncs, handler...)...)
+	// convert everything in acFuncs to interface{}
+	var ac []interface{}
+	for _, v := range acFuncs {
+		ac = append(ac, v)
+	}
+
+	return CGET(category, relativePath, append(ac, handler...)...)
 }
 
-func AuthedCPOST(category uint8, relativePath, userGroup string, handler ...*gin.HandlerFunc) error {
+func AuthedCPOST(category uint8, relativePath, userGroup string, handler ...interface{}) error {
 	acFuncs, acErr := getAccessControlFunc(userGroup)
 	if acErr != nil {
 		return acErr
 	}
 
-	return CPOST(category, relativePath, append(acFuncs, handler...)...)
+	// convert everything in acFuncs to interface{}
+	var ac []interface{}
+	for _, v := range acFuncs {
+		ac = append(ac, v)
+	}
+
+	return CGET(category, relativePath, append(ac, handler...)...)
 }
 
 // CGET() stands for Categorized GET
 // CGET(Payment, "dummy/test", f) will register f() as example.com/api/payment/dummy/test for GET method
 // Not validating the authentication header.
-func CGET(category uint8, relativePath string, handler ...*gin.HandlerFunc) error {
+func CGET(category uint8, relativePath string, handler ...interface{}) error {
+	// convert everything in handler to *gin.HandlerFunc
+	var h []*gin.HandlerFunc
+	for _, v := range handler {
+		tmp, ok := v.(*gin.HandlerFunc)
+		if !ok {
+			return ErrInvalidHandler
+		}
+		h = append(h, tmp)
+	}
+
 	if category, exist := availableCategories[category]; exist {
-		return get(category+relativePath, handler...)
+		return get(category+relativePath, h...)
 	} else {
 		return ErrInvalidCategory
 	}
@@ -60,9 +82,19 @@ func CGET(category uint8, relativePath string, handler ...*gin.HandlerFunc) erro
 // CPOST() stands for Categorized POST
 // CPOST(Payment, "dummy/test", f) will register f() as example.com/api/payment/dummy/test for POST method
 // Not validating the authentication header.
-func CPOST(category uint8, relativePath string, handler ...*gin.HandlerFunc) error {
+func CPOST(category uint8, relativePath string, handler ...interface{}) error {
+	// convert everything in handler to *gin.HandlerFunc
+	var h []*gin.HandlerFunc
+	for _, v := range handler {
+		tmp, ok := v.(*gin.HandlerFunc)
+		if !ok {
+			return ErrInvalidHandler
+		}
+		h = append(h, tmp)
+	}
+
 	if category, exist := availableCategories[category]; exist {
-		return post(category+relativePath, handler...)
+		return post(category+relativePath, h...)
 	} else {
 		return ErrInvalidCategory
 	}
