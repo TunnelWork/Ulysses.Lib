@@ -10,7 +10,7 @@ var (
 func Setup(d *sql.DB, sqlTblPrefix string) error {
 	db = d
 	if err := db.Ping(); err != nil {
-		return err
+		panic(err.Error())
 	}
 
 	tblPrefix = sqlTblPrefix

@@ -28,13 +28,13 @@ func initDatabaseTable() error {
         UNIQUE KEY (email)
     )`)
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 	defer stmtCreateUserTableIfNotExists.Close()
 
 	_, err = stmtCreateUserTableIfNotExists.Exec()
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 
 	stmtCreateUserInfoTableIfNotExists, err := sqlStatement(`CREATE TABLE IF NOT EXISTS dbprefix_auth_user_info (
@@ -51,13 +51,13 @@ func initDatabaseTable() error {
         CONSTRAINT FOREIGN KEY (id) REFERENCES dbprefix_auth_user(id) ON DELETE CASCADE
     )`)
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 	defer stmtCreateUserInfoTableIfNotExists.Close()
 
 	_, err = stmtCreateUserInfoTableIfNotExists.Exec()
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 
 	stmtCreateAffiliationTableIfNotExists, err := sqlStatement(`CREATE TABLE IF NOT EXISTS dbprefix_auth_affiliation (
@@ -77,13 +77,13 @@ func initDatabaseTable() error {
         UNIQUE KEY (name)
     )`)
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 	defer stmtCreateAffiliationTableIfNotExists.Close()
 
 	_, err = stmtCreateAffiliationTableIfNotExists.Exec()
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 
 	stmtCreateTmpTableIfNotExists, err := sqlStatement(`CREATE TABLE IF NOT EXISTS dbprefix_tmp_auth (
@@ -97,13 +97,13 @@ func initDatabaseTable() error {
         UNIQUE KEY (userID, extentionType, indexKey)
     )`)
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 	defer stmtCreateTmpTableIfNotExists.Close()
 
 	_, err = stmtCreateTmpTableIfNotExists.Exec()
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 
 	stmtCreateMfaTableIfNotExists, err := sqlStatement(`CREATE TABLE IF NOT EXISTS dbprefix_auth_mfa (
@@ -116,12 +116,15 @@ func initDatabaseTable() error {
         UNIQUE KEY (userID, extentionType)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`)
 	if err != nil {
-		return err
+		panic(err.Error())
 	}
 	defer stmtCreateMfaTableIfNotExists.Close()
 
 	_, err = stmtCreateMfaTableIfNotExists.Exec()
-	return err
+	if err != nil {
+		panic(err.Error())
+	}
+	return nil
 }
 
 /************ User Database ************/
