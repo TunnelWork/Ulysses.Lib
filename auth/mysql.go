@@ -17,7 +17,7 @@ func sqlStatement(query string) (*sql.Stmt, error) {
 	return db.Prepare(prefixUpdatedQuery)
 }
 
-func initDatabaseTable(db *sql.DB) error {
+func initDatabaseTable() error {
 	stmtCreateUserTableIfNotExists, err := sqlStatement(`CREATE TABLE IF NOT EXISTS dbprefix_auth_user (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         email VARCHAR(128) NOT NULL,

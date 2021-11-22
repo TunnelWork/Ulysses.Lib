@@ -12,5 +12,5 @@ func Setup(dbConn *sql.DB, tblPrefixOverride string) {
 
 	tblPrefix = tblPrefixOverride
 	// Create tables
-	initDatabaseTable(db)
+	initDatabaseTable()
 }
