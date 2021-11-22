@@ -6,25 +6,25 @@ const (
 	productTblCreation = `CREATE TABLE IF NOT EXISTS dbprefix_billing_products(
         serial_number BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         owner_uid BIGINT UNSIGNED NOT NULL DEFAULT 0,
-		owner_aid BIGINT UNSIGNED NOT NULL DEFAULT 0,
-		product_id BIGINT UNSIGNED NOT NULL,
+        owner_aid BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        product_id BIGINT UNSIGNED NOT NULL,
         date_creation DATE NOT NULL DEFAULT 0,
         date_last_bill DATE NOT NULL DEFAULT 0,
         date_termination DATE NOT NULL DEFAULT 0,
-		terminated BOOLEAN NOT NULL DEFAULT 0,
+        already_terminated BOOLEAN NOT NULL DEFAULT FALSE,
         wallet_id BIGINT UNSIGNED NOT NULL,
-		billing_cycle SMALLINT UNSIGNED NOT NULL,
-		price FLOAT NOT NULL,
-		monthly_spending_cap FLOAT NOT NULL,
-		current_month_spending FLOAT NOT NULL,
+        billing_cycle SMALLINT UNSIGNED NOT NULL,
+        price FLOAT NOT NULL,
+        monthly_spending_cap FLOAT NOT NULL,
+        current_month_spending FLOAT NOT NULL,
         PRIMARY KEY (serial_number),
-		INDEX (product_id),
+        INDEX (product_id),
         INDEX (owner_uid),
-		INDEX (owner_aid),
-		INDEX (billing_cycle),
-		CONSTRANT FOREIGN KEY (product_id) REFERENCES dbprefix_billing_product_listing(product_id) ON DELETE RESTRICT,
-		CONSTRAINT FOREIGN KEY (owner_uid) REFERENCES dbprefix_auth_user(id) ON DELETE CASCADE,
-		CONSTRAINT FOREIGN KEY (owner_aid) REFERENCES dbprefix_auth_affiliation(id) ON DELETE CASCADE
+        INDEX (owner_aid),
+        INDEX (billing_cycle),
+        CONSTRAINT FOREIGN KEY (product_id) REFERENCES dbprefix_billing_product_listing(product_id) ON DELETE RESTRICT,
+        CONSTRAINT FOREIGN KEY (owner_uid) REFERENCES dbprefix_auth_user(id) ON DELETE CASCADE,
+        CONSTRAINT FOREIGN KEY (owner_aid) REFERENCES dbprefix_auth_affiliation(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`
 )
 
@@ -150,7 +150,7 @@ func updateProduct(product *Product) error {
 }
 
 func terminateProductBySerialNumber(serialNumber uint64) error {
-	stmt, err := sqlStatement("UPDATE dbprefix_billing_products SET date_termination = CURDATE() WHERE serial_number = ? AND terminated = FALSE")
+	stmt, err := sqlStatement("UPDATE dbprefix_billing_products SET date_termination = CURDATE() WHERE serial_number = ? AND already_terminated = FALSE")
 	if err != nil {
 		return err
 	}
@@ -161,7 +161,7 @@ func terminateProductBySerialNumber(serialNumber uint64) error {
 }
 
 func toTerminateProductOn(serialNumber uint64, date string) error {
-	stmt, err := sqlStatement("UPDATE dbprefix_billing_products SET date_termination = ? WHERE serial_number = ? AND terminated = FALSE")
+	stmt, err := sqlStatement("UPDATE dbprefix_billing_products SET date_termination = ? WHERE serial_number = ? AND already_terminated = FALSE")
 	if err != nil {
 		return err
 	}
@@ -237,7 +237,7 @@ func listProductsByProductID(productID uint64) ([]*Product, error) {
 func listActiveProductsByBillingCycle(billingCycle uint8) ([]*Product, error) {
 	// List all products that is either not to be terminated yet (date_termination = 0)
 	// or has not been terminated yet (date_termination > today)
-	stmt, err := sqlStatement("SELECT * FROM dbprefix_billing_products WHERE billing_cycle = ? AND (date_termination = 0 OR date_termination > CURDATE()) AND terminated = FALSE")
+	stmt, err := sqlStatement("SELECT * FROM dbprefix_billing_products WHERE billing_cycle = ? AND (date_termination = 0 OR date_termination > CURDATE()) AND already_terminated = FALSE")
 	if err != nil {
 		return []*Product{}, err
 	}
@@ -271,7 +271,7 @@ func listAllProducts() ([]*Product, error) {
 }
 
 func listProductsToTerminate() ([]*Product, error) {
-	stmt, err := sqlStatement("SELECT * FROM dbprefix_billing_products WHERE (date_termination < CURDATE() OR date_termination = CURDATE()) AND terminated = FALSE")
+	stmt, err := sqlStatement("SELECT * FROM dbprefix_billing_products WHERE (date_termination < CURDATE() OR date_termination = CURDATE()) AND already_terminated = FALSE")
 	if err != nil {
 		return []*Product{}, err
 	}

@@ -15,10 +15,10 @@ const (
 		INDEX (user_id),
 		INDEX (product_id),
 		INDEX (product_serial_number),
-		CONSTRANT FOREIGN KEY (wallet_id) REFERENCES dbprefix_billing_wallets(wallet_id) ON DELETE CASCADE,
-		CONSTRANT FOREIGN KEY (user_id) REFERENCES dbprefix_auth_user(id) ON DELETE CASCADE,
-		CONSTRANT FOREIGN KEY (product_id) REFERENCES dbprefix_billing_product_listing(product_id) ON DELETE RESTRICT,
-		CONSTRANT FOREIGN KEY (product_serial_number) REFERENCES dbprefix_billing_products(serial_number) ON DELETE CASCADE
+		CONSTRAINT FOREIGN KEY (wallet_id) REFERENCES dbprefix_billing_wallets(wallet_id) ON DELETE CASCADE,
+		CONSTRAINT FOREIGN KEY (user_id) REFERENCES dbprefix_auth_user(id) ON DELETE CASCADE,
+		CONSTRAINT FOREIGN KEY (product_id) REFERENCES dbprefix_billing_product_listing(product_id) ON DELETE RESTRICT,
+		CONSTRAINT FOREIGN KEY (product_serial_number) REFERENCES dbprefix_billing_products(serial_number) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`
 )
 

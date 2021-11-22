@@ -16,7 +16,7 @@ func Setup(d *sql.DB, sqlTblPrefix string) error {
 	tblPrefix = sqlTblPrefix
 
 	// Setup all tables
-	setupWalletTable()
+	setupMysqlTable()
 
 	return nil
 }

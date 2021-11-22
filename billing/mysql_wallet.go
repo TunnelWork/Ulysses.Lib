@@ -9,7 +9,7 @@ const (
         disabled BOOLEAN NOT NULL DEFAULT FALSE,
         PRIMARY KEY (wallet_id),
         INDEX (owner_uid),
-		CONSTRANT FOREIGN KEY (owner_uid) REFERENCES dbprefix_auth_user(id)
+        CONSTRAINT FOREIGN KEY (owner_uid) REFERENCES dbprefix_auth_user(id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`
 )
 

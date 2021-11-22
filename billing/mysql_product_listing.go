@@ -14,14 +14,14 @@ const (
         product_description TEXT NOT NULL,
         server_type VARCHAR(64) NOT NULL,
         server_instance_id VARCHAR(128) NOT NULL,
-		server_configuration TEXT NOT NULL,
+        server_configuration TEXT NOT NULL,
         billing_options TEXT NOT NULL,
         usage_billing_factors TEXT NOT NULL,
         hidden BOOLEAN NOT NULL DEFAULT TRUE,
         discontinued BOOLEAN NOT NULL DEFAULT TRUE,
         PRIMARY KEY (product_id),
         INDEX (product_group_id),
-        CONSTRANT FOREIGN KEY (product_group_id) REFERENCES dbprefix_billing_product_listing_group(product_group_id) ON DELETE RESTRICT
+        CONSTRAINT FOREIGN KEY (product_group_id) REFERENCES dbprefix_billing_product_listing_group(product_group_id) ON DELETE RESTRICT
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;`
 )
 

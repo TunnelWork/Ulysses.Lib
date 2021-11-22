@@ -22,7 +22,7 @@ func sqlStatement(query string) (*sql.Stmt, error) {
 }
 
 /************ Table Creations ************/
-func setupWalletTable() {
+func setupMysqlTable() {
 	// dbprefix_billing_wallets relys on dbprefix_auth_user
 	stmt1, err := sqlStatement(walletTblCreation)
 	if err != nil {

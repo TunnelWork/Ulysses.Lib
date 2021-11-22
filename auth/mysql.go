@@ -48,7 +48,7 @@ func initDatabaseTable(db *sql.DB) error {
         country_iso VARCHAR(8) NOT NULL,
         zip_code VARCHAR(16) NOT NULL,
         PRIMARY KEY (id),
-        CONSTRANT FOREIGN KEY (id) REFERENCES dbprefix_auth_user(id) ON DELETE CASCADE
+        CONSTRAINT FOREIGN KEY (id) REFERENCES dbprefix_auth_user(id) ON DELETE CASCADE
     )`)
 	if err != nil {
 		return err
@@ -61,21 +61,21 @@ func initDatabaseTable(db *sql.DB) error {
 	}
 
 	stmtCreateAffiliationTableIfNotExists, err := sqlStatement(`CREATE TABLE IF NOT EXISTS dbprefix_auth_affiliation (
-		id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-		name VARCHAR(64) NOT NULL,
-		parent_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
-		owner_user_id BIGINT UNSIGNED NOT NULL,
-		shared_wallet_id BIGINT UNSIGNED NOT NULL,
-		street_address VARCHAR(128) NOT NULL,
+        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        name VARCHAR(64) NOT NULL,
+        parent_id BIGINT UNSIGNED NOT NULL DEFAULT 0,
+        owner_user_id BIGINT UNSIGNED NOT NULL,
+        shared_wallet_id BIGINT UNSIGNED NOT NULL,
+        street_address VARCHAR(128) NOT NULL,
         suite VARCHAR(64) NOT NULL,
         city VARCHAR(64) NOT NULL,
         state VARCHAR(64) NOT NULL,
         country_iso VARCHAR(8) NOT NULL,
         zip_code VARCHAR(16) NOT NULL,
         contact_email VARCHAR(128) NOT NULL,
-		PRIMARY KEY (id),
-		UNIQUE KEY (name)
-	)`)
+        PRIMARY KEY (id),
+        UNIQUE KEY (name)
+    )`)
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,7 @@ package billing
 
 const (
 	productListingGroupTblCreation = `CREATE TABLE IF NOT EXISTS dbprefix_billing_product_listing_group(
-		product_group_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+        product_group_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         product_group_name VARCHAR(64) NOT NULL,
         product_group_description TEXT NOT NULL,
         hidden BOOLEAN NOT NULL DEFAULT TRUE,
