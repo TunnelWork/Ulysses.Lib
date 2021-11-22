@@ -5,7 +5,6 @@ import "errors"
 var (
 	ErrBadMethod error = errors.New("api: bad method")
 
-	ErrInvalidHandler  error = errors.New("api: invalid handler")
 	ErrInvalidCategory error = errors.New("api: invalid category is selected")
 
 	ErrNotAllowDirectFuncReg error = errors.New("api: no direct handler func registration is allowed")
