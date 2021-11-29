@@ -504,16 +504,16 @@ func DeleteTmpEntry(userID uint64, extentionType, indexKey string) error {
 	return err
 }
 
-// func PurgeExpiredTmpEntry() error {
-// 	stmtClearTmpTable, err := sqlStatement(`DELETE FROM dbprefix_tmp_auth WHERE expiry < NOW();`)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	defer stmtClearTmpTable.Close()
+func PurgeExpiredTmpEntry() error {
+	stmtClearTmpTable, err := sqlStatement(`DELETE FROM dbprefix_tmp_auth WHERE expiry < NOW();`)
+	if err != nil {
+		return err
+	}
+	defer stmtClearTmpTable.Close()
 
-// 	_, err = stmtClearTmpTable.Exec()
-// 	return err
-// }
+	_, err = stmtClearTmpTable.Exec()
+	return err
+}
 
 /************ Internal ************/
 func checkEnabledMFA(userID uint64) ([]string, error) {
