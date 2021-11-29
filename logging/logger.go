@@ -9,11 +9,11 @@ import (
 )
 
 type Logger interface {
-	Debug(...interface{})
-	Info(...interface{})
-	Warning(...interface{})
-	Error(...interface{})
-	Fatal(...interface{})
+	Debug(string, ...interface{})
+	Info(string, ...interface{})
+	Warning(string, ...interface{})
+	Error(string, ...interface{})
+	Fatal(string, ...interface{})
 	Writer(prefix string, suffix string) io.Writer
 }
 
@@ -28,11 +28,11 @@ type dualLogger struct {
 
 	exitFunc *func()
 
-	_debug   func(...interface{})
-	_info    func(...interface{})
-	_warning func(...interface{})
-	_error   func(...interface{})
-	_fatal   func(...interface{})
+	_debug   func(string, ...interface{})
+	_info    func(string, ...interface{})
+	_warning func(string, ...interface{})
+	_error   func(string, ...interface{})
+	_fatal   func(string, ...interface{})
 }
 
 func DualLogger(conf LoggerConfig, wg *sync.WaitGroup, exFn *func()) *dualLogger {
@@ -58,7 +58,7 @@ func DualLogger(conf LoggerConfig, wg *sync.WaitGroup, exFn *func()) *dualLogger
 
 	switch dl.config.Level {
 	case LvlDebug:
-		dl._debug = func(v ...interface{}) {
+		dl._debug = func(format string, v ...interface{}) {
 			dl.mutex.Lock()
 			defer dl.mutex.Unlock()
 			if dl.waitGroup != nil {
@@ -66,15 +66,15 @@ func DualLogger(conf LoggerConfig, wg *sync.WaitGroup, exFn *func()) *dualLogger
 				defer dl.waitGroup.Done()
 			}
 			if dl.config.Verbose {
-				fmt.Print("Debug: ", fmt.Sprint(v...), "\n")
+				fmt.Print("Debug: ", fmt.Sprintf(format, v...), "\n")
 			}
 			if dl.fileLogger != nil {
-				dl.fileLogger.Print("Debug: ", fmt.Sprint(v...), "\n")
+				dl.fileLogger.Print("Debug: ", fmt.Sprintf(format, v...), "\n")
 			}
 		}
 		fallthrough
 	case LvlInfo:
-		dl._info = func(v ...interface{}) {
+		dl._info = func(format string, v ...interface{}) {
 			dl.mutex.Lock()
 			defer dl.mutex.Unlock()
 			if dl.waitGroup != nil {
@@ -82,15 +82,15 @@ func DualLogger(conf LoggerConfig, wg *sync.WaitGroup, exFn *func()) *dualLogger
 				defer dl.waitGroup.Done()
 			}
 			if dl.config.Verbose {
-				fmt.Print("Info: ", fmt.Sprint(v...), "\n")
+				fmt.Print("Info: ", fmt.Sprintf(format, v...), "\n")
 			}
 			if dl.fileLogger != nil {
-				dl.fileLogger.Print("Info: ", fmt.Sprint(v...), "\n")
+				dl.fileLogger.Print("Info: ", fmt.Sprintf(format, v...), "\n")
 			}
 		}
 		fallthrough
 	case LvlWarning:
-		dl._warning = func(v ...interface{}) {
+		dl._warning = func(format string, v ...interface{}) {
 			dl.mutex.Lock()
 			defer dl.mutex.Unlock()
 			if dl.waitGroup != nil {
@@ -98,15 +98,15 @@ func DualLogger(conf LoggerConfig, wg *sync.WaitGroup, exFn *func()) *dualLogger
 				defer dl.waitGroup.Done()
 			}
 			if dl.config.Verbose {
-				fmt.Print("Warning: ", fmt.Sprint(v...), "\n")
+				fmt.Print("Warning: ", fmt.Sprintf(format, v...), "\n")
 			}
 			if dl.fileLogger != nil {
-				dl.fileLogger.Print("Warning: ", fmt.Sprint(v...), "\n")
+				dl.fileLogger.Print("Warning: ", fmt.Sprintf(format, v...), "\n")
 			}
 		}
 		fallthrough
 	case LvlError:
-		dl._error = func(v ...interface{}) {
+		dl._error = func(format string, v ...interface{}) {
 			dl.mutex.Lock()
 			defer dl.mutex.Unlock()
 			if dl.waitGroup != nil {
@@ -114,22 +114,22 @@ func DualLogger(conf LoggerConfig, wg *sync.WaitGroup, exFn *func()) *dualLogger
 				defer dl.waitGroup.Done()
 			}
 			if dl.config.Verbose {
-				fmt.Print("Error: ", fmt.Sprint(v...), "\n")
+				fmt.Print("Error: ", fmt.Sprintf(format, v...), "\n")
 			}
 			if dl.fileLogger != nil {
-				dl.fileLogger.Print("Error: ", fmt.Sprint(v...), "\n")
+				dl.fileLogger.Print("Error: ", fmt.Sprintf(format, v...), "\n")
 			}
 		}
 		fallthrough
 	case LvlFatal:
-		dl._fatal = func(v ...interface{}) {
+		dl._fatal = func(format string, v ...interface{}) {
 			dl.mutex.Lock()
 
 			if dl.config.Verbose {
-				fmt.Print("Fatal: ", fmt.Sprint(v...), "\n")
+				fmt.Print("Fatal: ", fmt.Sprintf(format, v...), "\n")
 			}
 			if dl.fileLogger != nil {
-				dl.fileLogger.Print("Fatal: ", fmt.Sprint(v...), "\n")
+				dl.fileLogger.Print("Fatal: ", fmt.Sprintf(format, v...), "\n")
 			}
 
 			dl.mutex.Unlock()
@@ -150,24 +150,24 @@ func DualLogger(conf LoggerConfig, wg *sync.WaitGroup, exFn *func()) *dualLogger
 	return &dl
 }
 
-func (dl *dualLogger) Debug(v ...interface{}) {
-	dl._debug(v)
+func (dl *dualLogger) Debug(format string, v ...interface{}) {
+	dl._debug(format, v...)
 }
 
-func (dl *dualLogger) Info(v ...interface{}) {
-	dl._info(v)
+func (dl *dualLogger) Info(format string, v ...interface{}) {
+	dl._info(format, v...)
 }
 
-func (dl *dualLogger) Warning(v ...interface{}) {
-	dl._warning(v)
+func (dl *dualLogger) Warning(format string, v ...interface{}) {
+	dl._warning(format, v...)
 }
 
-func (dl *dualLogger) Error(v ...interface{}) {
-	dl._error(v)
+func (dl *dualLogger) Error(format string, v ...interface{}) {
+	dl._error(format, v...)
 }
 
-func (dl *dualLogger) Fatal(v ...interface{}) {
-	dl._fatal(v)
+func (dl *dualLogger) Fatal(format string, v ...interface{}) {
+	dl._fatal(format, v...)
 }
 
 func (dl *dualLogger) Writer(prefix, suffix string) io.Writer {

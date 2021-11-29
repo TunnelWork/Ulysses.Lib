@@ -6,106 +6,106 @@ import (
 )
 
 // Non-block
-func _Debug(v ...interface{}) {
+func _Debug(format string, v ...interface{}) {
 	if loggerWaitGroup != nil {
 		loggerWaitGroup.Add(1)
 	}
-	go _debug(v...)
+	go _debug(format, v...)
 }
 
 // Non-block
-func _Info(v ...interface{}) {
+func _Info(format string, v ...interface{}) {
 	if loggerWaitGroup != nil {
 		loggerWaitGroup.Add(1)
 	}
-	go _info(v...)
+	go _info(format, v...)
 }
 
 // Non-block
-func _Warning(v ...interface{}) {
+func _Warning(format string, v ...interface{}) {
 	if loggerWaitGroup != nil {
 		loggerWaitGroup.Add(1)
 	}
-	go _warning(v...)
+	go _warning(format, v...)
 }
 
 // Non-block
-func _Error(v ...interface{}) {
+func _Error(format string, v ...interface{}) {
 	if loggerWaitGroup != nil {
 		loggerWaitGroup.Add(1)
 	}
-	go _error(v...)
+	go _error(format, v...)
 }
 
 // Block!
-func _Fatal(v ...interface{}) {
-	_fatal(v...) // Not calling as goroutine because non-block.
+func _Fatal(format string, v ...interface{}) {
+	_fatal(format, v...) // Not calling as goroutine because non-block.
 }
 
-func _debug(v ...interface{}) {
+func _debug(format string, v ...interface{}) {
 	loggerMutex.Lock()
 	defer loggerMutex.Unlock()
 	if loggerWaitGroup != nil {
 		defer loggerWaitGroup.Done()
 	}
 	if verboseLogging {
-		fmt.Print("DEBUG: ", fmt.Sprint(v...), "\n")
+		fmt.Print("DEBUG: ", fmt.Sprintf(format, v...), "\n")
 	}
 	if fileLogger != nil {
-		fileLogger.Print("DEBUG: ", fmt.Sprint(v...), "\n")
+		fileLogger.Print("DEBUG: ", fmt.Sprintf(format, v...), "\n")
 	}
 }
 
-func _info(v ...interface{}) {
+func _info(format string, v ...interface{}) {
 	loggerMutex.Lock()
 	defer loggerMutex.Unlock()
 	if loggerWaitGroup != nil {
 		defer loggerWaitGroup.Done()
 	}
 	if verboseLogging {
-		fmt.Print("INFO: ", fmt.Sprint(v...), "\n")
+		fmt.Print("INFO: ", fmt.Sprintf(format, v...), "\n")
 	}
 	if fileLogger != nil {
-		fileLogger.Print("INFO: ", fmt.Sprint(v...), "\n")
+		fileLogger.Print("INFO: ", fmt.Sprintf(format, v...), "\n")
 	}
 }
 
-func _warning(v ...interface{}) {
+func _warning(format string, v ...interface{}) {
 	loggerMutex.Lock()
 	defer loggerMutex.Unlock()
 	if loggerWaitGroup != nil {
 		defer loggerWaitGroup.Done()
 	}
 	if verboseLogging {
-		fmt.Print("WARNING: ", fmt.Sprint(v...), "\n")
+		fmt.Print("WARNING: ", fmt.Sprintf(format, v...), "\n")
 	}
 	if fileLogger != nil {
-		fileLogger.Print("WARNING: ", fmt.Sprint(v...), "\n")
+		fileLogger.Print("WARNING: ", fmt.Sprintf(format, v...), "\n")
 	}
 }
 
-func _error(v ...interface{}) {
+func _error(format string, v ...interface{}) {
 	loggerMutex.Lock()
 	defer loggerMutex.Unlock()
 	if loggerWaitGroup != nil {
 		defer loggerWaitGroup.Done()
 	}
 	if verboseLogging {
-		fmt.Print("ERROR: ", fmt.Sprint(v...), "\n")
+		fmt.Print("ERROR: ", fmt.Sprintf(format, v...), "\n")
 	}
 	if fileLogger != nil {
-		fileLogger.Print("ERROR: ", fmt.Sprint(v...), "\n")
+		fileLogger.Print("ERROR: ", fmt.Sprintf(format, v...), "\n")
 	}
 }
 
-func _fatal(v ...interface{}) {
+func _fatal(format string, v ...interface{}) {
 	loggerMutex.Lock()
 
 	if verboseLogging {
-		fmt.Print("FATAL: ", fmt.Sprint(v...), "\n")
+		fmt.Print("FATAL: ", fmt.Sprintf(format, v...), "\n")
 	}
 	if fileLogger != nil {
-		fileLogger.Print("FATAL: ", fmt.Sprint(v...), "\n")
+		fileLogger.Print("FATAL: ", fmt.Sprintf(format, v...), "\n")
 	}
 
 	loggerMutex.Unlock()

@@ -13,15 +13,15 @@ func (lw *levelWriter) Write(p []byte) (n int, err error) {
 	}
 	switch lw.level {
 	case LvlDebug:
-		_debug(p)
+		_debug(string(p))
 	case LvlInfo:
-		_info(p)
+		_info(string(p))
 	case LvlWarning:
-		_warning(p)
+		_warning(string(p))
 	case LvlError:
-		_error(p)
+		_error(string(p))
 	case LvlFatal:
-		_fatal(p)
+		_fatal(string(p))
 	default:
 		return 0, ErrBadLoggingLvl
 	}

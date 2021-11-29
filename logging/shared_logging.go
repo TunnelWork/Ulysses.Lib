@@ -14,11 +14,11 @@ var (
 	loggerWaitGroup *sync.WaitGroup
 	exitingFunc     *func()
 
-	Debug   = func(...interface{}) {} // Trivial and aligning with best practices
-	Info    = func(...interface{}) {} // Non-trivial and aligning with best practices
-	Warning = func(...interface{}) {} // Non-trivial and not aligning with best practices
-	Error   = func(...interface{}) {} // Important and not in good condition, system can keep up
-	Fatal   = func(...interface{}) {} // Important and not in good condition, system can't keep up
+	Debug   = func(string, ...interface{}) {} // Trivial and aligning with best practices
+	Info    = func(string, ...interface{}) {} // Non-trivial and aligning with best practices
+	Warning = func(string, ...interface{}) {} // Non-trivial and not aligning with best practices
+	Error   = func(string, ...interface{}) {} // Important and not in good condition, system can keep up
+	Fatal   = func(string, ...interface{}) {} // Important and not in good condition, system can't keep up
 )
 
 func Init(loggerConfig LoggerConfig) error {
