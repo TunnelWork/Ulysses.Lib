@@ -102,7 +102,7 @@ func (affiliation *Affiliation) UpdateAffiliation() error {
 	return updateAffiliation(affiliation)
 }
 
-func (affiliation *Affiliation) Parent() (*Affiliation, error) {
+func (affiliation *Affiliation) ParentAffiliation() (*Affiliation, error) {
 	affiliation, err := getAffiliationByID(affiliation.ParentID)
 	if err == sql.ErrNoRows {
 		return nil, nil

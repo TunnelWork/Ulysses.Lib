@@ -206,6 +206,64 @@ func getUsersByAffiliationID(affiliationID uint64) ([]*User, error) {
 	return users, nil
 }
 
+func listUserID() ([]uint64, error) {
+	stmtListUserID, err := sqlStatement(`SELECT id FROM dbprefix_auth_user;`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmtListUserID.Close()
+
+	rows, err := stmtListUserID.Query()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var userIDs []uint64
+	for rows.Next() {
+		var userID uint64
+		err = rows.Scan(&userID)
+		if err != nil {
+			return nil, err
+		}
+		userIDs = append(userIDs, userID)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return userIDs, nil
+}
+
+func listUserIDByAffiliationID(affiliationID uint64) ([]uint64, error) {
+	stmtListUserIDByAffiliationID, err := sqlStatement(`SELECT id FROM dbprefix_auth_user WHERE affiliation = ?;`)
+	if err != nil {
+		return nil, err
+	}
+	defer stmtListUserIDByAffiliationID.Close()
+
+	rows, err := stmtListUserIDByAffiliationID.Query(affiliationID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var userIDs []uint64
+	for rows.Next() {
+		var userID uint64
+		err = rows.Scan(&userID)
+		if err != nil {
+			return nil, err
+		}
+		userIDs = append(userIDs, userID)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return userIDs, nil
+}
+
 func emailExists(email string) (bool, error) {
 	stmtCheckEmailExists, err := sqlStatement(`SELECT id FROM dbprefix_auth_user WHERE email = ?;`)
 	if err != nil {

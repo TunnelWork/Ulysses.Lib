@@ -43,13 +43,21 @@ func GetUsersByAffiliationID(affiliationID uint64) ([]*User, error) {
 	return getUsersByAffiliationID(affiliationID)
 }
 
+func ListUserID() ([]uint64, error) {
+	return listUserID()
+}
+
+func ListUserIDByAffiliationID(affiliationID uint64) ([]uint64, error) {
+	return listUserIDByAffiliationID(affiliationID)
+}
+
 func (user *User) ID() uint64 {
 	return user.id
 }
 
 // CreateUser should be called when registering a new user
-func (user *User) CreateUser() error {
-	exist, err := user.UserEmailExists()
+func (user *User) Create() error {
+	exist, err := user.EmailExists()
 	if err != nil {
 		return err
 	}
@@ -66,21 +74,21 @@ func (user *User) CreateUser() error {
 }
 
 // UserEmailExists should be called before submitting user creation form.
-func (user *User) UserEmailExists() (bool, error) {
+func (user *User) EmailExists() (bool, error) {
 	return emailExists(user.Email)
 }
 
 // UpdateUser
-func (user *User) UpdateUser() error {
+func (user *User) Update() error {
 	return updateUser(user)
 }
 
 // Wipe User Data
-func (user *User) WipeUserData() error {
+func (user *User) Wipe() error {
 	return wipeUserData(user)
 }
 
-func (user *User) NewUserInfo(info *UserInfo) error {
+func (user *User) CreateInfo(info *UserInfo) error {
 	return newUserInfo(user, info)
 }
 
