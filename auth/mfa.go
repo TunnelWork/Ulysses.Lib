@@ -42,7 +42,7 @@ func MFARegistered(MFAType string, userID uint64) bool {
 	return false
 }
 
-func MFAInisSignUp(MFAType string, userID uint64, username string) (map[string]interface{}, error) {
+func MFAInitSignUp(MFAType string, userID uint64, username string) (map[string]interface{}, error) {
 	if instance, ok := mfaInstanceRegistry[MFAType]; ok {
 		return instance.InitSignUp(userID, username)
 	}
