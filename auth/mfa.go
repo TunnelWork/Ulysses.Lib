@@ -35,6 +35,15 @@ func RegMFAInstance(MFAType string, instance MultiFactorAuthentication) {
 	mfaInstanceRegistry[MFAType] = instance
 }
 
+func AnyMFARegistered(userID uint64) bool {
+	for _, instance := range mfaInstanceRegistry {
+		if instance.Registered(userID) {
+			return true
+		}
+	}
+	return false
+}
+
 func MFARegistered(MFAType string, userID uint64) bool {
 	if instance, ok := mfaInstanceRegistry[MFAType]; ok {
 		return instance.Registered(userID)
