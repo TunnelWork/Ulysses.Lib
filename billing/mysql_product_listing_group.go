@@ -11,6 +11,32 @@ const (
 )
 
 /************ Product Listing Group Database ************/
+func listProductListingGroupIDs() ([]uint64, error) {
+	stmt, err := sqlStatement("SELECT product_group_id FROM dbprefix_billing_product_listing_group")
+	if err != nil {
+		return []uint64{}, err
+	}
+	defer stmt.Close()
+
+	var productListingGroupIDs []uint64
+	rows, err := stmt.Query()
+	if err != nil {
+		return []uint64{}, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var productListingGroupID uint64
+		err = rows.Scan(&productListingGroupID)
+		if err != nil {
+			return []uint64{}, err
+		}
+		productListingGroupIDs = append(productListingGroupIDs, productListingGroupID)
+	}
+
+	return productListingGroupIDs, nil
+}
+
 func getProductListingGroupByID(id uint64) (ProductListingGroup, error) {
 	stmt, err := sqlStatement("SELECT * FROM dbprefix_billing_product_listing_group WHERE product_group_id = ?")
 	if err != nil {

@@ -9,6 +9,10 @@ type ProductListingGroup struct {
 	Hidden                  bool   `json:"hidden"`
 }
 
+func ListProductListingGroupIDs() ([]uint64, error) {
+	return listProductListingGroupIDs()
+}
+
 func GetProductListingGroupByID(id uint64) (ProductListingGroup, error) {
 	return getProductListingGroupByID(id)
 }
