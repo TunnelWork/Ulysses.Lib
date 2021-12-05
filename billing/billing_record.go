@@ -2,6 +2,8 @@ package billing
 
 import "time"
 
+/* Needs Revision */
+
 type BillingRecord struct {
 	SerialNumber        uint64
 	WalletID            uint64
@@ -14,6 +16,9 @@ type BillingRecord struct {
 }
 
 func AddBillingRecord(record BillingRecord) (uint64, error) {
+	if record.WalletID == 0 {
+		return 0, nil // ignore internal wallet 0
+	}
 	return addBillingRecord(record)
 }
 

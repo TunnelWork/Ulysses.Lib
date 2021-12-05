@@ -53,6 +53,7 @@ func (p *Product) Terminated() bool {
 	return p.terminated
 }
 
+// Note that Add() does not charge the wallet.
 func (p *Product) Add() (uint64, error) {
 	return AddProduct(p)
 }
@@ -321,6 +322,10 @@ func ListUserProducts(ownerUserID uint64) ([]*Product, error) {
 // API Server should hide dateTermination in response, if dateTermination is earlier than dateCreation
 func ListAffiliationProducts(ownerAffiliationID uint64) ([]*Product, error) {
 	return listAffiliationProducts(ownerAffiliationID)
+}
+
+func ListSystemProducts() ([]*Product, error) {
+	return listSystemProducts()
 }
 
 // For admin viewing.

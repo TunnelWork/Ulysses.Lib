@@ -217,6 +217,23 @@ func listAffiliationProducts(ownerAffiliationID uint64) ([]*Product, error) {
 	return products, err
 }
 
+func listSystemProducts() ([]*Product, error) {
+	stmt, err := sqlStatement("SELECT * FROM dbprefix_billing_products WHERE owner_uid = 0 AND owner_aid = 0")
+	if err != nil {
+		return []*Product{}, err
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
+	if err != nil {
+		return []*Product{}, err
+	}
+	defer rows.Close()
+
+	products, err := rowsToProductSlice(rows)
+	return products, err
+}
+
 func listProductsByProductID(productID uint64) ([]*Product, error) {
 	stmt, err := sqlStatement("SELECT * FROM dbprefix_billing_products WHERE product_id = ?")
 	if err != nil {

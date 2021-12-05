@@ -47,12 +47,12 @@ func SudoGetProductListingByID(productID uint64) (*ProductListing, error) {
 }
 
 // For Customer. Not showing hidden/disconiued products
-func GetProductListingsByGroupID(productGroupID uint64) ([]*ProductListing, error) {
+func ListProductListingsByGroupID(productGroupID uint64) ([]*ProductListing, error) {
 	return getProductListingsByGroupID(productGroupID, false)
 }
 
 // For Admin. Include hidden/discontinued products
-func SudoGetProductListingsByGroupID(productGroupID uint64) ([]*ProductListing, error) {
+func SudoListProductListingsByGroupID(productGroupID uint64) ([]*ProductListing, error) {
 	return getProductListingsByGroupID(productGroupID, true)
 }
 
@@ -197,7 +197,7 @@ func DeleteProductListingByID(productID uint64) error {
 }
 
 type BillingOption struct {
-	BillingCycle         uint8   `json:"billing_cycle"` // 0 - Usage-based, 1 - Monthly, 2 - Quarterly, 3 - Annually
+	BillingCycle         uint8   `json:"billing_cycle"` // As defined in billing.go
 	Price                float64 `json:"price"`
 	MonthlySpendingCap   float64 `json:"monthly_spending_cap"`   // Only for Usage-based billing
 	CurrentMonthSpending float64 `json:"current_month_spending"` // Only for Usage-based billing
