@@ -43,12 +43,20 @@ func (w *Wallet) ID() uint64 {
 	return w.walletID
 }
 
+func (w *Wallet) OwnerUserID() uint64 {
+	return w.ownerUserID
+}
+
 func (w *Wallet) Balance() float64 {
 	return w.balance
 }
 
 func (w *Wallet) Secured() float64 {
 	return w.secured
+}
+
+func (w *Wallet) Disabled() bool {
+	return w.disabled
 }
 
 func (w *Wallet) Deposit(amount float64) error {

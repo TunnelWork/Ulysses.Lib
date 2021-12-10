@@ -74,19 +74,20 @@ func setupMysqlTable() {
 		panic(err)
 	}
 
-	// dbprefix_billing_record relys on:
-	// - dbprefix_auth_user
-	// - dbprefix_billing_wallets
-	// - dbprefix_billing_product_listing
-	// - dbprefix_billing_products
-	stmt5, err := sqlStatement(billingRecordTblCreation)
-	if err != nil {
-		panic(err)
-	}
-	defer stmt5.Close()
+	// Commented for further revision
+	// // dbprefix_billing_record relys on:
+	// // - dbprefix_auth_user
+	// // - dbprefix_billing_wallets
+	// // - dbprefix_billing_product_listing
+	// // - dbprefix_billing_products
+	// stmt5, err := sqlStatement(billingRecordTblCreation)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// defer stmt5.Close()
 
-	_, err = stmt5.Exec()
-	if err != nil {
-		panic(err)
-	}
+	// _, err = stmt5.Exec()
+	// if err != nil {
+	// 	panic(err)
+	// }
 }

@@ -7,7 +7,7 @@ package payment
 // based on their purchase or deposit order.
 type PrepaidGateway interface {
 	/**** Pay ****/
-	CheckoutForm(pr PaymentRequest) (HTMLCheckoutForm string, err error)
+	CheckoutForm(pr PaymentRequest) (formRenderParams map[string]interface{}, err error)
 
 	/**** Status ****/
 	// PaymentResult() checks for a referenceID
