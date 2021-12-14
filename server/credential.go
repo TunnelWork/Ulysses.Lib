@@ -1,6 +1,6 @@
 package server
 
 type Credential struct {
-	CredentialName  string
-	CredentialValue interface{} // string, int, bool, []string, []int only
+	CredentialName  string      `json:"credential_name"`
+	CredentialValue interface{} `json:"credential_value"` // string, int, bool, []string, []int only
 }

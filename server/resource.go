@@ -11,8 +11,8 @@ const (
 )
 
 type Resource struct {
-	ResourceID uint64 // enums should be saved somewhere in the database
-	Allocated  float64
-	Used       float64
-	Free       float64
+	ResourceID uint64  `json:"resource_id"` // enums should be saved somewhere in the database
+	Allocated  float64 `json:"allocated"`
+	Used       float64 `json:"used"`
+	Free       float64 `json:"free"`
 }

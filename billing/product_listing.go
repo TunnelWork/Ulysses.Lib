@@ -197,10 +197,11 @@ func DeleteProductListingByID(productID uint64) error {
 }
 
 type BillingOption struct {
-	BillingCycle         uint8   `json:"billing_cycle"` // As defined in billing.go
-	Price                float64 `json:"price"`
-	MonthlySpendingCap   float64 `json:"monthly_spending_cap"`   // Only for Usage-based billing
-	CurrentMonthSpending float64 `json:"current_month_spending"` // Only for Usage-based billing
+	BillingCycle         uint8                  `json:"billing_cycle"` // As defined in billing.go
+	Price                float64                `json:"price"`
+	MonthlySpendingCap   float64                `json:"monthly_spending_cap"`   // Only for Usage-based billing
+	CurrentMonthSpending float64                `json:"current_month_spending"` // Only for Usage-based billing
+	AccountConfiguration map[string]interface{} `json:"account_configuration"`
 }
 
 func BillingOptionsFromJSON(jsonStr string) ([]BillingOption, error) {
