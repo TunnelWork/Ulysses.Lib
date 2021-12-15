@@ -76,7 +76,7 @@ func main() {
 	router.StaticFile("/qrcode.min.js", "./qrcode.min.js")
 	router.POST("/register/init", func(c *gin.Context) {
 		var ri *registerInit = &registerInit{}
-		err := c.BindJSON(&ri)
+		err := c.ShouldBindBodyWith(&ri)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -96,7 +96,7 @@ func main() {
 
 	router.POST("/register/finish", func(c *gin.Context) {
 		var rf *registerFinish = &registerFinish{}
-		err := c.BindJSON(&rf)
+		err := c.ShouldBindBodyWith(&rf)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -119,7 +119,7 @@ func main() {
 
 	router.POST("/login/finish", func(c *gin.Context) {
 		var lf *loginFinish = &loginFinish{}
-		err := c.BindJSON(&lf)
+		err := c.ShouldBindBodyWith(&lf)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
