@@ -21,7 +21,7 @@ func initDatabaseTable() error {
 	stmtCreateUserTableIfNotExists, err := sqlStatement(`CREATE TABLE IF NOT EXISTS dbprefix_auth_user (
         id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
         email VARCHAR(128) NOT NULL,
-        password VARCHAR(255) NOT NULL,
+        publickey VARCHAR(64) NOT NULL,
         role INT UNSIGNED NOT NULL DEFAULT 0,
         affiliation BIGINT UNSIGNED NOT NULL DEFAULT 0,
         PRIMARY KEY (id),
@@ -130,13 +130,13 @@ func initDatabaseTable() error {
 /************ User Database ************/
 
 func newUser(user *User) error {
-	stmtInsertUser, err := sqlStatement(`INSERT INTO dbprefix_auth_user (email, password, role, affiliation) VALUES (?, ?, ?, ?);`)
+	stmtInsertUser, err := sqlStatement(`INSERT INTO dbprefix_auth_user (email, publickey, role, affiliation) VALUES (?, ?, ?, ?);`)
 	if err != nil {
 		return err
 	}
 	defer stmtInsertUser.Close()
 
-	result, err := stmtInsertUser.Exec(user.Email, user.Password, user.Role, user.AffiliationID)
+	result, err := stmtInsertUser.Exec(user.Email, user.PublicKey, user.Role, user.AffiliationID)
 	if err != nil {
 		return err
 	}
@@ -146,14 +146,14 @@ func newUser(user *User) error {
 }
 
 func getUserByID(userID uint64) (*User, error) {
-	stmtGetUserByID, err := sqlStatement(`SELECT id, email, password, role, affiliation FROM dbprefix_auth_user WHERE id = ?;`)
+	stmtGetUserByID, err := sqlStatement(`SELECT id, email, publickey, role, affiliation FROM dbprefix_auth_user WHERE id = ?;`)
 	if err != nil {
 		return nil, err
 	}
 	defer stmtGetUserByID.Close()
 
 	var user User
-	err = stmtGetUserByID.QueryRow(userID).Scan(&user.id, &user.Email, &user.Password, &user.Role, &user.AffiliationID)
+	err = stmtGetUserByID.QueryRow(userID).Scan(&user.id, &user.Email, &user.PublicKey, &user.Role, &user.AffiliationID)
 	if err != nil {
 		return nil, err
 	}
@@ -161,15 +161,15 @@ func getUserByID(userID uint64) (*User, error) {
 	return &user, nil
 }
 
-func getUserByEmailPassword(email, password string) (*User, error) {
-	stmtGetUserByEmailPassword, err := sqlStatement(`SELECT id, email, password, role, affiliation FROM dbprefix_auth_user WHERE email = ? AND password = ?;`)
+func getUserByEmail(email string) (*User, error) {
+	stmtGetUserByEmailPassword, err := sqlStatement(`SELECT id, email, publickey, role, affiliation FROM dbprefix_auth_user WHERE email = ?;`)
 	if err != nil {
 		return nil, err
 	}
 	defer stmtGetUserByEmailPassword.Close()
 
 	var user User
-	err = stmtGetUserByEmailPassword.QueryRow(email, password).Scan(&user.id, &user.Email, &user.Password, &user.Role, &user.AffiliationID)
+	err = stmtGetUserByEmailPassword.QueryRow(email).Scan(&user.id, &user.Email, &user.PublicKey, &user.Role, &user.AffiliationID)
 	if err != nil {
 		return nil, err
 	}
@@ -178,7 +178,7 @@ func getUserByEmailPassword(email, password string) (*User, error) {
 }
 
 func getUsersByAffiliationID(affiliationID uint64) ([]*User, error) {
-	stmtGetUsersByAffiliationID, err := sqlStatement(`SELECT id, email, password, role, affiliation FROM dbprefix_auth_user WHERE affiliation = ?;`)
+	stmtGetUsersByAffiliationID, err := sqlStatement(`SELECT id, email, publickey, role, affiliation FROM dbprefix_auth_user WHERE affiliation = ?;`)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +193,7 @@ func getUsersByAffiliationID(affiliationID uint64) ([]*User, error) {
 	var users []*User
 	for rows.Next() {
 		var user User
-		err = rows.Scan(&user.id, &user.Email, &user.Password, &user.Role, &user.AffiliationID)
+		err = rows.Scan(&user.id, &user.Email, &user.PublicKey, &user.Role, &user.AffiliationID)
 		if err != nil {
 			return nil, err
 		}
@@ -285,13 +285,13 @@ func emailExists(email string) (bool, error) {
 }
 
 func updateUser(user *User) error {
-	stmtUpdateUser, err := sqlStatement(`UPDATE dbprefix_auth_user SET email = ?, password = ?, role = ?, affiliation = ? WHERE id = ?;`)
+	stmtUpdateUser, err := sqlStatement(`UPDATE dbprefix_auth_user SET email = ?, publickey = ?, role = ?, affiliation = ? WHERE id = ?;`)
 	if err != nil {
 		return err
 	}
 	defer stmtUpdateUser.Close()
 
-	_, err = stmtUpdateUser.Exec(user.Email, user.Password, user.Role, user.AffiliationID, user.id)
+	_, err = stmtUpdateUser.Exec(user.Email, user.PublicKey, user.Role, user.AffiliationID, user.id)
 	return err
 }
 
