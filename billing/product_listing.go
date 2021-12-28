@@ -120,7 +120,7 @@ func (pl *ProductListing) Reactivate() error {
 	}
 }
 
-func (pl *ProductListing) CreateProduct(ownerUserID, ownerAffiliationID uint64, BillingCycle uint8, WalletID uint64) (*Product, error) {
+func (pl *ProductListing) CreateProduct(ownerUserID, ownerAffiliationID uint64, billingCycle uint8, walletID uint64) (*Product, error) {
 	if pl.discontinued {
 		return nil, errors.New("billing: product is discontinued")
 	}
@@ -128,7 +128,7 @@ func (pl *ProductListing) CreateProduct(ownerUserID, ownerAffiliationID uint64, 
 	// Find matching BillingOption
 	var billingOption BillingOption
 	for _, bo := range pl.BillingOptions {
-		if bo.BillingCycle == BillingCycle {
+		if bo.BillingCycle == billingCycle {
 			billingOption = bo
 			break
 		}
@@ -142,7 +142,7 @@ func (pl *ProductListing) CreateProduct(ownerUserID, ownerAffiliationID uint64, 
 		OwnerUserID:        ownerUserID,
 		OwnerAffiliationID: ownerAffiliationID,
 		ProductID:          pl.ProductID(),
-		WalletID:           WalletID,
+		WalletID:           walletID,
 		BillingOption:      billingOption,
 	}
 	return &product, nil
