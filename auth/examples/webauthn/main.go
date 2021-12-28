@@ -8,6 +8,7 @@ import (
 	"github.com/TunnelWork/Ulysses.Lib/auth"
 	"github.com/TunnelWork/Ulysses.Lib/auth/mfa/webauthn"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -80,7 +81,7 @@ func main() {
 	router.StaticFile("/scripts.js", "./scripts.js")
 	router.POST("/register/init", func(c *gin.Context) {
 		var ri *registerInit = &registerInit{}
-		err := c.ShouldBindBodyWith(&ri)
+		err := c.ShouldBindBodyWith(&ri, binding.JSON)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -100,7 +101,7 @@ func main() {
 
 	router.POST("/register/finish", func(c *gin.Context) {
 		var rf *registerFinish = &registerFinish{}
-		err := c.ShouldBindBodyWith(&rf)
+		err := c.ShouldBindBodyWith(&rf, binding.JSON)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -131,7 +132,7 @@ func main() {
 
 	router.POST("/login/init", func(c *gin.Context) {
 		var li *loginInit = &loginInit{}
-		err := c.ShouldBindBodyWith(&li)
+		err := c.ShouldBindBodyWith(&li, binding.JSON)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
@@ -151,7 +152,7 @@ func main() {
 
 	router.POST("/login/finish", func(c *gin.Context) {
 		var lf *loginFinish = &loginFinish{}
-		err := c.ShouldBindBodyWith(&lf)
+		err := c.ShouldBindBodyWith(&lf, binding.JSON)
 		if err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
